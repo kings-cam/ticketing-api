@@ -1,0 +1,17 @@
+version: 2.0
+jobs:
+  build:
+    working_directory: /go/src/api
+    docker:
+      - image: circleci/golang:1.8
+    steps:
+      - checkout
+      - run:
+          name: Get packages
+          command: go get github.com/labstack/echo && go get github.com/labstack/echo/middleware
+      - run:
+          name: Build
+          command: go build
+      - run:
+          name: Validate
+          command: go vet server.go && if $(gofmt -d server.go); then echo "No formatting errors found!"; else exit 1; fi
