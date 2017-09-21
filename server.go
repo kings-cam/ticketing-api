@@ -18,7 +18,7 @@ func welcome(c echo.Context) error {
 // Server API
 func main() {
 	e := echo.New()
-
+	
 	// Middleware
 	// Server log
 	e.Use(middleware.Logger())

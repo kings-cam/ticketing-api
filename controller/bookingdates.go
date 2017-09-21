@@ -1,7 +1,7 @@
 package bookingdates
 
 import (
-	"encoding/json"
+	// "encoding/json"
 	"fmt"
 	"time"
 	"github.com/labstack/echo"
@@ -13,12 +13,12 @@ var bookingdates []string
 // Return dates of bookings
 func BookingDates(c echo.Context) error {
 	// Errors
-	var err error
+	// var err error
 	// Start date as tomorrow
 	startdate := time.Now().Local().AddDate(0, 0, 1)
 	fmt.Println("Start date: ", startdate.Format("2006-01-02"))
 	// End date as 3 months from tomorrow
-	enddate := startdate.AddDate(0, 3, 0)
+	enddate := startdate.AddDate(0, 2, 0)
 	fmt.Println("End date: ", enddate.Format("2006-01-02"))
 
 	// Iterate over dates to print all allowed dates
@@ -28,10 +28,12 @@ func BookingDates(c echo.Context) error {
 			bookingdates = append(bookingdates, d.Format("2006-01-02"))
 		}
 	}
+	/*
 	dates, err := json.Marshal(bookingdates)
 	if err != nil {
 		fmt.Println("JSON marshaling failed: %s", err)
 	}
 	fmt.Printf("%s\n", dates)
+        */
 	return c.JSON(http.StatusCreated, bookingdates)
 }
