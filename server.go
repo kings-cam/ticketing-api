@@ -1,6 +1,8 @@
 package main
 
 import (
+	// Booking dates
+	"ticketing-api/controller"
 	// HTTP requests
 	"net/http"
 	// Echo framework
@@ -29,9 +31,12 @@ func main() {
 		AllowMethods: []string{echo.GET, echo.HEAD, echo.PUT, echo.PATCH, echo.POST, echo.DELETE},
 	}))
 
-	// Route
+	// Route welcome
 	e.GET("/api/v1/", welcome)
 
+	// Route dates
+	e.GET("/api/v1/dates/", bookingdates.BookingDates)
+	
 	// Server
 	e.Logger.Fatal(e.Start(":4000"))
 }
