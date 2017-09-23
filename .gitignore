@@ -6,8 +6,6 @@
 
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out
-api
-ticketing-api
 server
 
 # Temporary files
