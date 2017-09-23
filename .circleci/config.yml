@@ -15,7 +15,7 @@ jobs:
               go get gopkg.in/mgo.v2
       - run:
           name: Build
-          command: go build 
+          command: go build cmd/api/server.go
       - run:
           name: Test
           command: go test
