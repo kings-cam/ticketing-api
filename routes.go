@@ -13,7 +13,7 @@ func welcome(c echo.Context) error {
 	return c.String(http.StatusOK, "Welcome to King's Chapel Ticketing API version 1!")
 }
 
-func InitialiseRoutes(e *echo.Echo) {
+func Routes(e *echo.Echo) {
 	e.Pre(middleware.RemoveTrailingSlash())
 
 	// Welcome

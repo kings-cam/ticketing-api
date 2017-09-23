@@ -9,7 +9,10 @@
 
 # Install dependencies
 
-* `go get github.com/labstack/echo`
+```
+go get github.com/labstack/echo
+go get github.com/stretchr/testify/assert
+```
 
 # Compile
 
