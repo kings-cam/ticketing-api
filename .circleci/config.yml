@@ -8,7 +8,11 @@ jobs:
       - checkout
       - run:
           name: Get packages
-          command: go get github.com/labstack/echo && go get github.com/labstack/echo/middleware && go get github.com/stretchr/testify/assert
+          command: |
+              go get github.com/labstack/echo && \
+              go get github.com/labstack/echo/middleware && \
+              go get github.com/stretchr/testify/assert && \
+              go get gopkg.in/mgo.v2
       - run:
           name: Build
           command: go build 

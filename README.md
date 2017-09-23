@@ -1,7 +1,7 @@
 # King's College Chapel Ticketing API
 > Krishna Kumar
 
-[![CircleCI](https://circleci.com/gh/kks32/ticketing-api.svg?style=svg)](https://circleci.com/gh/kks32/ticketing-api)
+[![CircleCI](https://circleci.com/gh/kings-cam/ticketing-api.svg?style=svg)](https://circleci.com/gh/kings-cam/ticketing-api)
 
 # Clone repository
 * Clone the repo: `git clone git@github.com:kings-cam/ticketing-api tickets`
