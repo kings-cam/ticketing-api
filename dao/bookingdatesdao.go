@@ -23,8 +23,5 @@ func BookingDates() []string {
 		}
 	}
 
-	if (len(bookingdates) == 0) {
-		
-	}
 	return bookingdates
 }
