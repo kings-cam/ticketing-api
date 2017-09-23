@@ -14,6 +14,8 @@ func welcome(c echo.Context) error {
 }
 
 func Routes(e *echo.Echo) {
+	// Create a MongoDB session
+	
 	e.Pre(middleware.RemoveTrailingSlash())
 
 	// Welcome
@@ -21,4 +23,6 @@ func Routes(e *echo.Echo) {
 
 	// Booking dates
 	e.GET("/api/v1/dates", GetBookingDates)
+	// Config Booking dates
+	e.POST("/api/v1/dates/config", ConfigBookingDates)
 }

@@ -1,30 +1,99 @@
 package tickets
 
 import (
+	"fmt"
 	// HTTP requests
 	"net/http"
-	"time"
-	// "gopkg.in/mgo.v2/bson"
+	// "time"
+	// "encoding/json"
+	"gopkg.in/mgo.v2"
+	"gopkg.in/mgo.v2/bson"
+	"log"
 	// Echo webframework
 	"github.com/labstack/echo"
 )
 
-/*
+
 type BookingConfig struct {
+	ID int `json:"_id"`
 	// Start date for booking
-	StartDate string `json:"startdate, omitempty" bson:"startdate, omitempty"`
+	// StartDate string `json:"startdate, omitempty"`
 	// Number of days from start date
-	EndDays int `json:"enddays, omitempty" bson:"enddays, omitempty"`
+	// EndDays int `json:"enddays, omitempty"`
 	// Exclude days
-	ExcludeDays []string `json:"excludedays, omitempty" bson:"excludedays, omitempty"`
+	// ExcludeDays []string `json:"excludedays, omitempty"`
+	// Booking days
+	BookingDays []string `json:"bookingdays, omitempty"`
 }
 
-type bookingconfig BookingConfig
-*/
+func ConfigBookingDates(c echo.Context) (err error) {
+	
+	config := new(BookingConfig)
+	if err = c.Bind(config); err != nil {
+		return
+	}
+	
+	db := DB{}
+	session, err := db.Dial()
+	
+	if err != nil {
+		panic(err)
+	}
+	defer session.Close()
+
+	session.SetMode(mgo.Monotonic, true)
+
+	
+	dbc := session.DB("tickets").C("config")
+
+	err = dbc.Insert(config)
+	if err != nil {
+		if mgo.IsDup(err) {
+			panic(err)
+			return
+		}
+		panic(err)
+		fmt.Println("Failed insert book: ", err)
+		return
+	}
+	return c.JSON(http.StatusOK, config)
+}
 
 func BookingDates() []string {
+
+	db := DB{}
+	session, err := db.Dial()
+	
+	if err != nil {
+		panic(err)
+	}
+	defer session.Close()
+
+	session.SetMode(mgo.Monotonic, true)
 	var bookingdates []string
 
+
+	c := session.DB("tickets").C("config")
+	var config BookingConfig
+
+	err = c.Find(bson.M{"_id": 0}).One(config)
+	if err != nil {
+		fmt.Println("Failed find book: ", err)
+	}
+
+	if len(config.BookingDays) == 0 {
+		fmt.Println("Booking dates are empty")
+	}
+
+	//respBody, err := json.MarshalIndent(config, "", "  ")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Println(config.BookingDays)
+
+	bookingdates = config.BookingDays
+	/*
 	// Start date as tomorrow
 	startdate := time.Now().Local().AddDate(0, 0, 1)
 
@@ -38,13 +107,12 @@ func BookingDates() []string {
 			bookingdates = append(bookingdates, d.Format("2006-01-02"))
 		}
 	}
-
+        */
 	return bookingdates
 }
 
 // Return dates of bookings
 func GetBookingDates(c echo.Context) error {
 	// bd, _ to get errors
-	bd := BookingDates()
-	return c.JSON(http.StatusCreated, bd)
+	return c.JSON(http.StatusCreated, BookingDates)
 }

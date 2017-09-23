@@ -12,3 +12,6 @@ server
 *#*
 *.*sw*
 *~*
+
+# Database
+db/
