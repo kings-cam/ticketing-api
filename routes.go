@@ -1,7 +1,6 @@
-package routes
+package tickets
 
 import (
-	"ticketing-api/routes/bookingdates"
 	// HTTP requests
 	"net/http"
 	// Echo webframework
@@ -14,12 +13,13 @@ func welcome(c echo.Context) error {
 	return c.String(http.StatusOK, "Welcome to King's Chapel Ticketing API version 1!")
 }
 
-func Init(e *echo.Echo) {
+func InitialiseRoutes(e *echo.Echo) {
 	e.Pre(middleware.RemoveTrailingSlash())
 
 	// Welcome
 	e.GET("/api/v1", welcome)
 	
 	// Booking dates
-	bookingdatesroutes.Init(e)
+	e.GET("/api/v1/dates", GetBookingDates)
 }
+
