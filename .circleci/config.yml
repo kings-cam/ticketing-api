@@ -1,7 +1,7 @@
 version: 2.0
 jobs:
   build:
-    working_directory: /go/src/api
+    working_directory: /go/src/tickets
     docker:
       - image: circleci/golang:1.8
     steps:
@@ -17,5 +17,5 @@ jobs:
           name: Build
           command: go build 
       - run:
-          name: Validate
-          command: go vet cmd/api/server.go && go test
+          name: Test
+          command: go test
