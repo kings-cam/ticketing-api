@@ -22,7 +22,7 @@ func Routes(e *echo.Echo) {
 	e.GET("/api/v1", welcome)
 
 	// Booking dates
-	e.GET("/api/v1/dates", GetBookingDates)
+	e.GET("/api/v1/dates", BookingDates)
 	// Config Booking dates
 	e.POST("/api/v1/dates/config", ConfigBookingDates)
 }

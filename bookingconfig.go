@@ -15,7 +15,7 @@ import (
 
 
 type BookingConfig struct {
-	ID int `json:"_id"`
+	ID int `json:"id"`
 	// Start date for booking
 	// StartDate string `json:"startdate, omitempty"`
 	// Number of days from start date
@@ -59,7 +59,7 @@ func ConfigBookingDates(c echo.Context) (err error) {
 	return c.JSON(http.StatusOK, config)
 }
 
-func BookingDates() []string {
+func BookingDates(c echo.Context) error {
 
 	db := DB{}
 	session, err := db.Dial()
@@ -69,14 +69,16 @@ func BookingDates() []string {
 	}
 	defer session.Close()
 
-	session.SetMode(mgo.Monotonic, true)
+	// session.SetMode(mgo.Monotonic, true)
+
 	var bookingdates []string
 
+	fmt.Println(len(bookingdates))
 
-	c := session.DB("tickets").C("config")
+	dbc := session.DB("tickets").C("config")
 	var config BookingConfig
 
-	err = c.Find(bson.M{"_id": 0}).One(config)
+	err = dbc.Find(bson.M{}).One(config)
 	if err != nil {
 		fmt.Println("Failed find book: ", err)
 	}
@@ -108,11 +110,5 @@ func BookingDates() []string {
 		}
 	}
         */
-	return bookingdates
-}
-
-// Return dates of bookings
-func GetBookingDates(c echo.Context) error {
-	// bd, _ to get errors
-	return c.JSON(http.StatusCreated, BookingDates)
+	return c.JSON(http.StatusCreated, bookingdates)
 }
