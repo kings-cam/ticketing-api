@@ -1,7 +1,7 @@
 package bookingdatescontroller
 
 import (
-	"ticketing-api/dao"
+	"ticketing-api/dao/bookingdates"
 	// "encoding/json"
 	"net/http"
 

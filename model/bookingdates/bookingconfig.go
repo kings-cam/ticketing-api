@@ -1,4 +1,4 @@
-package dates
+package bookingconfig
 
 import (
 	"time"
@@ -6,11 +6,13 @@ import (
 	"gopkg.in/mgo.v2/bson"
 )
 
-type BookingDates struct {
+type BookingConfig struct {
 	// Start date for booking
 	StartDate string `json:"startdate, omitempty" bson:"startdate, omitempty"`
 	// Number of days from start date
 	EndDays int `json:"enddays, omitempty" bson:"enddays, omitempty"`
+	// Exclude days
+	ExcludeDays []string `json:"excludedays, omitempty" bson:"excludedays, omitempty"`
 }
 
-type bookingconfig BookingDates
+type bookingconfig BookingConfig

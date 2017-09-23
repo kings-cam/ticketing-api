@@ -1,7 +1,7 @@
 package bookingdatesdao
 
 import (
-	// "ticketing-api/model/bookingdatesmodel"
+	// "ticketing-api/model"
 	"time"
 	// "error"
 )

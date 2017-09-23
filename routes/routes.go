@@ -1,7 +1,7 @@
 package routes
 
 import (
-	"ticketing-api/controller"
+	"ticketing-api/routes/bookingdates"
 	// HTTP requests
 	"net/http"
 	// Echo webframework
@@ -17,9 +17,9 @@ func welcome(c echo.Context) error {
 func Init(e *echo.Echo) {
 	e.Pre(middleware.RemoveTrailingSlash())
 
-	// Route welcome
+	// Welcome
 	e.GET("/api/v1", welcome)
-
+	
 	// Booking dates
-	e.GET("/api/v1/dates", bookingdatescontroller.BookingDates)
+	bookingdatesroutes.Init(e)
 }
