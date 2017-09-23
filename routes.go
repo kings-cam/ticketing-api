@@ -18,8 +18,7 @@ func Routes(e *echo.Echo) {
 
 	// Welcome
 	e.GET("/api/v1", welcome)
-	
+
 	// Booking dates
 	e.GET("/api/v1/dates", GetBookingDates)
 }
-

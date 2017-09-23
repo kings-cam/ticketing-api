@@ -30,7 +30,7 @@ func BookingDates() []string {
 
 	// End date as 90 days (3 months) from tomorrow
 	enddate := startdate.AddDate(0, 0, 90)
-	
+
 	// Iterate over dates to print all allowed dates
 	for d := startdate; d != enddate; d = d.AddDate(0, 0, 1) {
 		// Exclude weekends (0 - Sunday, 6 - Saturday)

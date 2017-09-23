@@ -26,7 +26,7 @@ func (db *DB) Name() string {
 func DBUrl() string {
 	// Try to fetch MongoDB URL
 	db_url := os.Getenv("MONGOHQ_URL")
-	
+
 	if db_url == "" {
 		db_url = "localhost"
 	}

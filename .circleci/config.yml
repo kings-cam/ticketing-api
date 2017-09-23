@@ -8,10 +8,10 @@ jobs:
       - checkout
       - run:
           name: Get packages
-          command: go get github.com/labstack/echo && go get github.com/labstack/echo/middleware
+          command: go get github.com/labstack/echo && go get github.com/labstack/echo/middleware && go get github.com/stretchr/testify/assert
       - run:
           name: Build
-          command: go build
+          command: go build 
       - run:
           name: Validate
-          command: go vet server.go && if $(gofmt -d server.go); then echo "No formatting errors found!"; else exit 1; fi
+          command: go vet cmd/api/server.go && go test
