@@ -21,5 +21,5 @@ func Init(e *echo.Echo) {
 	e.GET("/api/v1", welcome)
 
 	// Booking dates
-	e.GET("/api/v1/dates", bookingdates.BookingDates)
+	e.GET("/api/v1/dates", bookingdatescontroller.BookingDates)
 }

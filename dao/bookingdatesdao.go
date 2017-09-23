@@ -1,21 +1,19 @@
-package bookingdates
+package bookingdatesdao
 
 import (
-	// "encoding/json"
+	// "ticketing-api/model/bookingdatesmodel"
 	"time"
-	"github.com/labstack/echo"
-	"net/http"
+	// "error"
 )
 
-var bookingdates []string
+func BookingDates() []string {
+	var bookingdates []string
 
-// Return dates of bookings
-func BookingDates(c echo.Context) error {
 	// Start date as tomorrow
 	startdate := time.Now().Local().AddDate(0, 0, 1)
 
-	// End date as 3 months from tomorrow
-	enddate := startdate.AddDate(0, 3, 0)
+	// End date as 90 days (3 months) from tomorrow
+	enddate := startdate.AddDate(0, 0, 90)
 	
 	// Iterate over dates to print all allowed dates
 	for d := startdate; d != enddate; d = d.AddDate(0, 0, 1) {
@@ -24,5 +22,9 @@ func BookingDates(c echo.Context) error {
 			bookingdates = append(bookingdates, d.Format("2006-01-02"))
 		}
 	}
-	return c.JSON(http.StatusCreated, bookingdates)
+
+	if (len(bookingdates) == 0) {
+		
+	}
+	return bookingdates
 }
