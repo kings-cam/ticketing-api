@@ -1,19 +1,14 @@
 package main
 
 import (
-	// Booking dates
-	"ticketing-api/controller"
-	// HTTP requests
-	"net/http"
+	// Routes
+	"ticketing-api/routes"
 	// Echo framework
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 )
 
-// Handle root
-func welcome(c echo.Context) error {
-	return c.String(http.StatusOK, "Welcome to King's Chapel Ticketing API!")
-}
+const port string = ":4000"
 
 // Server API
 func main() {
@@ -31,11 +26,8 @@ func main() {
 		AllowMethods: []string{echo.GET, echo.HEAD, echo.PUT, echo.PATCH, echo.POST, echo.DELETE},
 	}))
 
-	// Route welcome
-	e.GET("/api/v1/", welcome)
-
-	// Route dates
-	e.GET("/api/v1/dates/", bookingdates.BookingDates)
+	// Initialise routes
+	routes.Init(e)
 	
 	// Server
 	e.Logger.Fatal(e.Start(":4000"))
