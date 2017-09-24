@@ -38,6 +38,12 @@
   version = "v1.1.4"
 
 [[projects]]
+  branch = "master"
+  name = "github.com/thoas/stats"
+  packages = ["."]
+  revision = "152b5d051953fdb6e45f14b6826962aadc032324"
+
+[[projects]]
   name = "github.com/urfave/negroni"
   packages = ["."]
   revision = "fde5e16d32adc7ad637e9cd9ad21d4ebc6192535"
@@ -52,6 +58,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "ca716a4610c7072326d931408b90b6def6379475fcfd102095fc4f4514faeedd"
+  inputs-digest = "27a6b9af486836775abe5c4590264069afd9892a113a8e1fa047f3b83d33efed"
   solver-name = "gps-cdcl"
   solver-version = 1
