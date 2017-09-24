@@ -66,10 +66,15 @@ func main() {
 
 	
 	// Welcome
+	mux.HandleFunc("/", func (w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte("Welcome to Ticketing API, visit /api/v1/ to see version 1.0!\n"))
+	})
+
+	// API V1
 	mux.HandleFunc("/api/v1/", func (w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("Ticketing API version 1.0!\n"))
 	})
-        
+
 	
 	// Stats
 	mux.HandleFunc("/api/v1/stats", func(w http.ResponseWriter, r *http.Request) {
