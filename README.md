@@ -10,8 +10,11 @@
 # Install dependencies
 
 ```
-go get github.com/labstack/echo
-go get github.com/stretchr/testify/assert
+              go get github.com/rs/cors && \
+              go get github.com/gorilla/mux && \
+              go get gopkg.in/mgo.v2 && \
+              go get github.com/urfave/negroni && \
+              go get github.com/stretchr/testify/assert
 ```
 
 # Compile
