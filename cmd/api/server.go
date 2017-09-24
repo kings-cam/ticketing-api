@@ -28,18 +28,15 @@ func main() {
 	apirouter := mux.NewRouter()
 
 	// Stats middleware
-	statsmiddleware := stats.New()
-
-	// create common middleware to be shared across routes
-	// includes recovery and logging
+	statsmw := stats.New()
 
 	// CORS for cross-domain access controls
-	corsmiddleware := cors.New(cors.Options{
+	corsmw := cors.New(cors.Options{
 		AllowedOrigins: []string{"*"},
 		AllowedMethods: []string{"GET", "HEAD", "PUT", "PATCH", "POST", "DELETE"},
 
 	})
-        
+
 	/*
 	//For production, keep HTTPSProtection = true
 	HTTPSProtection := false
@@ -69,8 +66,8 @@ func main() {
 	apirouter.PathPrefix("/api/v1").Handler(negroni.New(
 		negroni.NewRecovery(),
 		negroni.NewLogger(),
-		statsmiddleware,
-		corsmiddleware,
+		statsmw,
+		corsmw,
 		negroni.Wrap(apiv1router),
 	))
 
@@ -82,7 +79,7 @@ func main() {
 	// Stats
 	apiv1router.HandleFunc("/stats", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		stats := statsmiddleware.Data()
+		stats := statsmw.Data()
 		b, _ := json.Marshal(stats)
 		w.Write(b)
 	})
