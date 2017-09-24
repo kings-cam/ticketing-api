@@ -5,7 +5,6 @@ import (
 	"tickets"
 
 	"encoding/json"
-	// "fmt"
 	"net/http"
 	"log"
 	"time"
@@ -26,25 +25,21 @@ const port string = ":4000"
 
 // Server API
 func main() {
-	mux := mux.NewRouter()
-
-	// Includes some default middlewares
-	// Recovery and logging
-	n := negroni.Classic()
+	apirouter := mux.NewRouter()
 
 	// Stats middleware
 	statsmiddleware := stats.New()
-	n.Use(statsmiddleware)
+
+	// create common middleware to be shared across routes
+	// includes recovery and logging
 
 	// CORS for cross-domain access controls
-	c := cors.New(cors.Options{
+	corsmiddleware := cors.New(cors.Options{
 		AllowedOrigins: []string{"*"},
 		AllowedMethods: []string{"GET", "HEAD", "PUT", "PATCH", "POST", "DELETE"},
 
 	})
-	n.Use(c)
-
-
+        
 	/*
 	//For production, keep HTTPSProtection = true
 	HTTPSProtection := false
@@ -62,41 +57,48 @@ func main() {
 
 	defer session.Close()
 	session.SetMode(mgo.Monotonic, true)
-
-
 	
-	// Welcome
-	mux.HandleFunc("/", func (w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("Welcome to Ticketing API, visit /api/v1/ to see version 1.0!\n"))
+	// API Router
+	apirouter.HandleFunc("/", func (w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte("Ticketing API\n"))
 	})
+	
+	
+	// API V1 router
+	apiv1router := mux.NewRouter().PathPrefix("/api/v1").Subrouter().StrictSlash(true)
+	apirouter.PathPrefix("/api/v1").Handler(negroni.New(
+		negroni.NewRecovery(),
+		negroni.NewLogger(),
+		statsmiddleware,
+		corsmiddleware,
+		negroni.Wrap(apiv1router),
+	))
 
-	// API V1
-	mux.HandleFunc("/api/v1/", func (w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("Ticketing API version 1.0!\n"))
+	// API version 1.0 welcome
+	apiv1router.HandleFunc("/", func (w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte("Ticketing API version 1!\n"))
 	})
-
 	
 	// Stats
-	mux.HandleFunc("/api/v1/stats", func(w http.ResponseWriter, r *http.Request) {
+	apiv1router.HandleFunc("/stats", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		stats := statsmiddleware.Data()
 		b, _ := json.Marshal(stats)
 		w.Write(b)
 	})
+        
 
 	// Booking dates
-	mux.HandleFunc("/api/v1/dates/", tickets.BookingDates(session)).Methods("GET")
+	apiv1router.HandleFunc("/dates", tickets.BookingDates(session)).Methods("GET")
 
 	// Config Booking dates
-	mux.HandleFunc("/api/v1/dates/config/", tickets.ConfigBookingDates(session)).Methods("POST")
+	apiv1router.HandleFunc("/dates/config", tickets.ConfigBookingDates(session)).Methods("POST")
 
-	// listen and serve api
-	n.UseHandler(mux)
 
 	// Create and launch server
 	log.Println("Launching web api in http://localhost"+port)
 	server := &http.Server{
-		Handler:      n,
+		Handler:      apirouter,
 		Addr:         "127.0.0.1" + port,
 		// Enforce timeouts for servers
 		WriteTimeout: 15 * time.Second,
