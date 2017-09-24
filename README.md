@@ -17,13 +17,20 @@
               go get github.com/stretchr/testify/assert
 ```
 
+or 
+
+```
+dep ensure
+dep ensure -update
+```
+
 # Compile
 
-`go build cmd/api/server.go`
+`go build cmd/api.go`
 
 # Run
 
-`./server`
+`./api`
 
 # Stats
 
