@@ -1,9 +1,14 @@
 package main
 
 import (
+	// Ticketing package
+	"tickets"
+
 	// Routes
 	"net/http"
-	// "tickets"
+
+	// Mongodb
+	"gopkg.in/mgo.v2"
 	// Gorilla Mux
 	"github.com/gorilla/mux"
 	// Negroni framework
@@ -40,13 +45,27 @@ func main() {
 		AllowMethods: []string{echo.GET, echo.HEAD, echo.PUT, echo.PATCH, echo.POST, echo.DELETE},
 	}))
 	*/
+	
+	// Create database and session
+	db := tickets.DB{}
+	session, err := db.Dial()
 
-	// Initialise routes
-	//	tickets.Routes(mux)
+	if err != nil {
+		panic(err)
+	}
 
-	mux.HandleFunc("/", func(w http.ResponseWriter, req *http.Request) {
-		panic("oh no")
-	})
+	defer session.Close()
+	session.SetMode(mgo.Monotonic, true)
+
+
+	// Welcome
+	// mux.HandleFunc("/api/v1", welcome).Methods("GET")
+
+	// Booking dates
+	mux.HandleFunc("/api/v1/dates", tickets.BookingDates(session)).Methods("GET")
+
+	// Config Booking dates
+	mux.HandleFunc("/api/v1/dates/config", tickets.ConfigBookingDates(session)).Methods("POST")
 	
 	http.ListenAndServe(port, n)
 }

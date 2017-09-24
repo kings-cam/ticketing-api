@@ -1,28 +1,18 @@
 package tickets
 
 import (
-	// HTTP requests
+	"fmt"
 	"net/http"
-	// Echo webframework
-	"github.com/labstack/echo"
-	"github.com/labstack/echo/middleware"
 )
 
-// Welcome message
-func welcome(c echo.Context) error {
-	return c.String(http.StatusOK, "Welcome to King's Chapel Ticketing API version 1!")
+func ErrorWithJSON(w http.ResponseWriter, message string, code int) {  
+    w.Header().Set("Content-Type", "application/json; charset=utf-8")
+    w.WriteHeader(code)
+    fmt.Fprintf(w, "{message: %q}", message)
 }
 
-func Routes(e *echo.Echo) {
-	// Create a MongoDB session
-	
-	e.Pre(middleware.RemoveTrailingSlash())
-
-	// Welcome
-	e.GET("/api/v1", welcome)
-
-	// Booking dates
-	e.GET("/api/v1/dates", BookingDates)
-	// Config Booking dates
-	e.POST("/api/v1/dates/config", ConfigBookingDates)
+func ResponseWithJSON(w http.ResponseWriter, json []byte, code int) {  
+    w.Header().Set("Content-Type", "application/json; charset=utf-8")
+    w.WriteHeader(code)
+    w.Write(json)
 }

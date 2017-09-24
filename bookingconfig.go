@@ -1,18 +1,15 @@
 package tickets
 
 import (
-	"fmt"
-	// HTTP requests
+	"encoding/json"
+	"log"
 	"net/http"
 	// "time"
-	// "encoding/json"
+
+	// Mongo DB
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
-	"log"
-	// Echo webframework
-	"github.com/labstack/echo"
 )
-
 
 type BookingConfig struct {
 	ID int `json:"id"`
@@ -26,91 +23,85 @@ type BookingConfig struct {
 	BookingDays []string `json:"bookingdays, omitempty"`
 }
 
-func ConfigBookingDates(c echo.Context) (err error) {
-	
-	config := new(BookingConfig)
-	if err = c.Bind(config); err != nil {
-		return
-	}
-	
-	db := DB{}
-	session, err := db.Dial()
-	
-	if err != nil {
-		panic(err)
-	}
-	defer session.Close()
+func ConfigBookingDates(s *mgo.Session) func(w http.ResponseWriter, r *http.Request) {  
+	return func(w http.ResponseWriter, r *http.Request) {
+		session := s.Copy()
+		defer session.Close()
 
-	session.SetMode(mgo.Monotonic, true)
-
-	
-	dbc := session.DB("tickets").C("config")
-
-	err = dbc.Insert(config)
-	if err != nil {
-		if mgo.IsDup(err) {
-			panic(err)
+		var config BookingConfig
+		decoder := json.NewDecoder(r.Body)
+		err := decoder.Decode(&config)
+		if err != nil {
+			ErrorWithJSON(w, "Incorrect body", http.StatusBadRequest)
 			return
 		}
-		panic(err)
-		fmt.Println("Failed insert book: ", err)
-		return
+
+		c := session.DB("tickets").C("config")
+
+		err = c.Insert(config)
+		if err != nil {
+			if mgo.IsDup(err) {
+				ErrorWithJSON(w, "Config with this ID already exists", http.StatusBadRequest)
+				return
+			}
+
+			ErrorWithJSON(w, "Database error", http.StatusInternalServerError)
+			log.Println("Failed insert config: ", err)
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		w.Header().Set("Location", r.URL.Path+"/0")
+		w.WriteHeader(http.StatusCreated)
 	}
-	return c.JSON(http.StatusOK, config)
 }
 
-func BookingDates(c echo.Context) error {
+func BookingDates(s *mgo.Session) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
 
-	db := DB{}
-	session, err := db.Dial()
-	
-	if err != nil {
-		panic(err)
-	}
-	defer session.Close()
+		// Copy and launch a Mongo session
+		session := s.Copy()
+		defer session.Close()
 
-	// session.SetMode(mgo.Monotonic, true)
+		// Open config collections
+		dbc := session.DB("tickets").C("config")
 
-	var bookingdates []string
-
-	fmt.Println(len(bookingdates))
-
-	dbc := session.DB("tickets").C("config")
-	var config BookingConfig
-
-	err = dbc.Find(bson.M{"id": 0}).One(config)
-	if err != nil {
-		fmt.Println("Failed find book: ", err)
-	}
-	
-	fmt.Println(config.BookingDays)
-
-	if len(config.BookingDays) == 0 {
-		fmt.Println("Booking dates are empty")
-	}
-
-	//respBody, err := json.MarshalIndent(config, "", "  ")
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	fmt.Println(config.BookingDays)
-
-	bookingdates = config.BookingDays
-	/*
-	// Start date as tomorrow
-	startdate := time.Now().Local().AddDate(0, 0, 1)
-
-	// End date as 90 days (3 months) from tomorrow
-	enddate := startdate.AddDate(0, 0, 90)
-
-	// Iterate over dates to print all allowed dates
-	for d := startdate; d != enddate; d = d.AddDate(0, 0, 1) {
-		// Exclude weekends (0 - Sunday, 6 - Saturday)
-		if d.Weekday() != 0 {
-			bookingdates = append(bookingdates, d.Format("2006-01-02"))
+		var config BookingConfig
+		// Find the configuration file
+		err := dbc.Find(bson.M{}).One(&config)
+		if err != nil {
+			ErrorWithJSON(w, "Database error", http.StatusInternalServerError)
+			log.Println("Failed to find config: ", err)
+			return
 		}
+
+		if len(config.BookingDays) == 0 {
+			ErrorWithJSON(w, "Config not found", http.StatusNotFound)
+			log.Println("Configuration with id not found: ", err)
+			return
+		}
+
+		respBody, err := json.MarshalIndent(config.BookingDays, "", "  ")
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		
+		/*
+			// Start date as tomorrow
+			startdate := time.Now().Local().AddDate(0, 0, 1)
+
+			// End date as 90 days (3 months) from tomorrow
+			enddate := startdate.AddDate(0, 0, 90)
+
+			// Iterate over dates to print all allowed dates
+			for d := startdate; d != enddate; d = d.AddDate(0, 0, 1) {
+				// Exclude weekends (0 - Sunday, 6 - Saturday)
+				if d.Weekday() != 0 {
+					bookingdates = append(bookingdates, d.Format("2006-01-02"))
+				}
+			}
+		*/
+		ResponseWithJSON(w, respBody, http.StatusOK)
 	}
-        */
-	return c.JSON(http.StatusCreated, bookingdates)
 }
