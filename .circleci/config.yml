@@ -13,7 +13,8 @@ jobs:
               go get github.com/gorilla/mux && \
               go get gopkg.in/mgo.v2 && \
               go get github.com/urfave/negroni && \
-              go get github.com/stretchr/testify/assert
+              go get github.com/stretchr/testify/assert && \
+              go get github.com/thoas/stats
       - run:
           name: Build
           command: go build cmd/api/server.go

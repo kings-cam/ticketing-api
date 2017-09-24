@@ -4,7 +4,7 @@ import (
 	// Ticketing package
 	"tickets"
 
-	// Routes
+	"encoding/json"
 	"net/http"
 
 	// CORS
@@ -15,6 +15,8 @@ import (
 	"github.com/gorilla/mux"
 	// Negroni framework
 	"github.com/urfave/negroni"
+	// Stats
+	"github.com/thoas/stats"
 )
 
 const port string = ":4000"
@@ -31,6 +33,8 @@ func main() {
 
 	// Logger
 	n.Use(negroni.NewLogger())
+	// Stats middleware
+	statsmiddleware := stats.New()
 
 	// CORS for cross-domain access controls
 	c := cors.New(cors.Options{
@@ -68,6 +72,17 @@ func main() {
 	// Config Booking dates
 	mux.HandleFunc("/api/v1/dates/config/", tickets.ConfigBookingDates(session)).Methods("POST")
 
+	mux.HandleFunc("/api/v1/stats", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		
+		stats := middleware.Data()
+
+		b, _ := json.Marshal(stats)
+
+		w.Write(b)
+	})
+
+	n.Use(statsmiddleware)
 	// listen and serve api
 	n.UseHandler(mux)
 	http.ListenAndServe(port, n)
