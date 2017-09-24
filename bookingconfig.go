@@ -78,10 +78,12 @@ func BookingDates(c echo.Context) error {
 	dbc := session.DB("tickets").C("config")
 	var config BookingConfig
 
-	err = dbc.Find(bson.M{}).One(config)
+	err = dbc.Find(bson.M{"id": 0}).One(config)
 	if err != nil {
 		fmt.Println("Failed find book: ", err)
 	}
+	
+	fmt.Println(config.BookingDays)
 
 	if len(config.BookingDays) == 0 {
 		fmt.Println("Booking dates are empty")

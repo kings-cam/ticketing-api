@@ -9,8 +9,8 @@ jobs:
       - run:
           name: Get packages
           command: |
-              go get github.com/labstack/echo && \
-              go get github.com/labstack/echo/middleware && \
+              go get github.com/gorilla/mux && \
+              go get github.com/urfave/negroni && \
               go get github.com/stretchr/testify/assert && \
               go get gopkg.in/mgo.v2
       - run:
