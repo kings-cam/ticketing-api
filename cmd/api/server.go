@@ -25,7 +25,6 @@ func main() {
 
 	// Includes some default middlewares
 	n := negroni.Classic()
-	n.UseHandler(mux)
 
 	// Recovery
 	n.Use(negroni.NewRecovery())
@@ -36,6 +35,8 @@ func main() {
 	// CORS for cross-domain access controls
 	c := cors.New(cors.Options{
 		AllowedOrigins: []string{"*"},
+		AllowedMethods: []string{"GET", "HEAD", "PUT", "PATCH", "POST", "DELETE"},
+
 	})
 	n.Use(c)
 
@@ -46,14 +47,6 @@ func main() {
 		app.Use(restgate.New("X-Auth-Key", "X-Auth-Secret", restgate.Static, restgate.Config{HTTPSProtectionOff: false, Key: []string{c.API_ENDPOINT_KEY}, Secret: []string{c.API_ENDPOINT_SECRET}}))
         */
 	
-	/*
-	// CORS for cross-domain access controls
-	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-		AllowOrigins: []string{"*"},
-		AllowMethods: []string{echo.GET, echo.HEAD, echo.PUT, echo.PATCH, echo.POST, echo.DELETE},
-	}))
-	*/
-
 	// Create database and session
 	db := tickets.DB{}
 	session, err := db.Dial()
@@ -74,7 +67,9 @@ func main() {
 
 	// Config Booking dates
 	mux.HandleFunc("/api/v1/dates/config/", tickets.ConfigBookingDates(session)).Methods("POST")
-	
+
+	// listen and serve api
+	n.UseHandler(mux)
 	http.ListenAndServe(port, n)
 }
 
