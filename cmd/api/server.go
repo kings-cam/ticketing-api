@@ -6,6 +6,7 @@ import (
 
 	"encoding/json"
 	"net/http"
+	"log"
 
 	// CORS
 	"github.com/rs/cors"
@@ -85,6 +86,7 @@ func main() {
 	n.Use(statsmiddleware)
 	// listen and serve api
 	n.UseHandler(mux)
+	log.Println("Launching web api in http://localhost"+port)
 	http.ListenAndServe(port, n)
 }
 

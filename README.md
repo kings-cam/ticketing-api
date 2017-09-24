@@ -24,3 +24,9 @@
 # Run
 
 `./server`
+
+# Stats
+
+```
+curl http://localhost:4000/api/v1/stats | python -m "json.tool"
+```
