@@ -30,6 +30,10 @@ dep ensure -update
 
 # Run
 
+## Launch mongo
+`mkdir ./db && mongod --dbpath ./db`
+
+## Run api server
 `./api`
 
 # Stats
