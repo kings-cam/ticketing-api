@@ -15,3 +15,6 @@ server
 
 # Database
 db/
+
+# Vendor files
+vendor/
