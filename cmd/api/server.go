@@ -64,13 +64,12 @@ func main() {
 	session.SetMode(mgo.Monotonic, true)
 
 
-	/*
+	
 	// Welcome
-	mux.HandleFunc("/api/v1/", func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusOK)
-		fmt.Fprintf(w, "Welcome to Ticketing API version 1.0\n")
+	mux.HandleFunc("/api/v1/", func (w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte("Ticketing API version 1.0!\n"))
 	})
-        */
+        
 	
 	// Stats
 	mux.HandleFunc("/api/v1/stats", func(w http.ResponseWriter, r *http.Request) {
