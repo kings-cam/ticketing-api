@@ -7,6 +7,8 @@ import (
 	// Routes
 	"net/http"
 
+	// CORS
+	"github.com/rs/cors"
 	// Mongodb
 	"gopkg.in/mgo.v2"
 	// Gorilla Mux
@@ -31,6 +33,12 @@ func main() {
 	// Logger
 	n.Use(negroni.NewLogger())
 
+	// CORS for cross-domain access controls
+	c := cors.New(cors.Options{
+		AllowedOrigins: []string{"*"},
+	})
+	n.Use(c)
+
 	/*
 	//For production, keep HTTPSProtection = true
 	HTTPSProtection := false
@@ -45,7 +53,7 @@ func main() {
 		AllowMethods: []string{echo.GET, echo.HEAD, echo.PUT, echo.PATCH, echo.POST, echo.DELETE},
 	}))
 	*/
-	
+
 	// Create database and session
 	db := tickets.DB{}
 	session, err := db.Dial()
@@ -62,10 +70,10 @@ func main() {
 	// mux.HandleFunc("/api/v1", welcome).Methods("GET")
 
 	// Booking dates
-	mux.HandleFunc("/api/v1/dates", tickets.BookingDates(session)).Methods("GET")
+	mux.HandleFunc("/api/v1/dates/", tickets.BookingDates(session)).Methods("GET")
 
 	// Config Booking dates
-	mux.HandleFunc("/api/v1/dates/config", tickets.ConfigBookingDates(session)).Methods("POST")
+	mux.HandleFunc("/api/v1/dates/config/", tickets.ConfigBookingDates(session)).Methods("POST")
 	
 	http.ListenAndServe(port, n)
 }
