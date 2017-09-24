@@ -5,8 +5,10 @@ import (
 	"tickets"
 
 	"encoding/json"
+	// "fmt"
 	"net/http"
 	"log"
+	"time"
 
 	// CORS
 	"github.com/rs/cors"
@@ -27,15 +29,12 @@ func main() {
 	mux := mux.NewRouter()
 
 	// Includes some default middlewares
+	// Recovery and logging
 	n := negroni.Classic()
 
-	// Recovery
-	n.Use(negroni.NewRecovery())
-
-	// Logger
-	n.Use(negroni.NewLogger())
 	// Stats middleware
 	statsmiddleware := stats.New()
+	n.Use(statsmiddleware)
 
 	// CORS for cross-domain access controls
 	c := cors.New(cors.Options{
@@ -44,6 +43,7 @@ func main() {
 
 	})
 	n.Use(c)
+
 
 	/*
 	//For production, keep HTTPSProtection = true
@@ -64,8 +64,21 @@ func main() {
 	session.SetMode(mgo.Monotonic, true)
 
 
+	/*
 	// Welcome
-	// mux.HandleFunc("/api/v1", welcome).Methods("GET")
+	mux.HandleFunc("/api/v1/", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		fmt.Fprintf(w, "Welcome to Ticketing API version 1.0\n")
+	})
+        */
+	
+	// Stats
+	mux.HandleFunc("/api/v1/stats", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		stats := statsmiddleware.Data()
+		b, _ := json.Marshal(stats)
+		w.Write(b)
+	})
 
 	// Booking dates
 	mux.HandleFunc("/api/v1/dates/", tickets.BookingDates(session)).Methods("GET")
@@ -73,20 +86,18 @@ func main() {
 	// Config Booking dates
 	mux.HandleFunc("/api/v1/dates/config/", tickets.ConfigBookingDates(session)).Methods("POST")
 
-	mux.HandleFunc("/api/v1/stats", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		
-		stats := statsmiddleware.Data()
-
-		b, _ := json.Marshal(stats)
-
-		w.Write(b)
-	})
-
-	n.Use(statsmiddleware)
 	// listen and serve api
 	n.UseHandler(mux)
+
+	// Create and launch server
 	log.Println("Launching web api in http://localhost"+port)
-	http.ListenAndServe(port, n)
+	server := &http.Server{
+		Handler:      n,
+		Addr:         "127.0.0.1" + port,
+		// Enforce timeouts for servers
+		WriteTimeout: 15 * time.Second,
+		ReadTimeout:  15 * time.Second,
+	}	
+	log.Fatal(server.ListenAndServe())
 }
 
