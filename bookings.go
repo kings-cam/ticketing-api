@@ -11,7 +11,7 @@ import (
 	"gopkg.in/mgo.v2/bson"
 )
 
-// dayinecludedays returns true if the day is found in excluded days
+// dayinexcludedays returns true if the day is found in excluded days
 func dayinexcludedays(d time.Time, excludedays []time.Weekday) bool {
 	// Get day 
 	day := d.Weekday()
@@ -24,6 +24,19 @@ func dayinexcludedays(d time.Time, excludedays []time.Weekday) bool {
 		}
 	}
 	return excludeday
+}
+
+// dayinexcludedates returns true if the day is found in excluded days
+func dayinexcludedates(date time.Time, excludedates []string) bool {
+	// Get day 
+	excludedate := false
+	// Check if the given day is in the exclude list
+	for i := range excludedates {
+		if excludedates[i] == date.Format("2006-01-02") {
+			excludedate = true
+		}
+	}
+	return excludedate
 }
 
 // BookingDates return allowable booking days
@@ -55,13 +68,18 @@ func BookingDates(s *mgo.Session) func(w http.ResponseWriter, r *http.Request) {
 		// End date as 90 days (3 months) from tomorrow
 		enddate := startdate.AddDate(0, 0, 90)
 
+		// Exclude dates
+		excludedates := config.ExcludeDays
+		log.Println(excludedates)
+
 		// Exclude days
 		excludedays := []time.Weekday{0,6}
 		
 		// Iterate over dates to print all allowed dates
 		for d := startdate; d != enddate; d = d.AddDate(0, 0, 1) {
 			// Exclude weekends (0 - Sunday, 6 - Saturday)
-			if !dayinexcludedays(d, excludedays) {
+			if (!dayinexcludedays(d, excludedays) &&
+				!dayinexcludedates(d, excludedates)) {
 				bookingdates = append(bookingdates, d.Format("2006-01-02"))
 			}
 		}
