@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
-	"time"
 
 	// Mongo DB
 	"gopkg.in/mgo.v2"
@@ -18,9 +17,9 @@ type BookingConfig struct {
 	// Number of days from start date
 	// EndDays int `json:"enddays, omitempty"`
 	// Exclude days
-	// ExcludeDays []string `json:"excludedays, omitempty"`
+	ExcludeDays []string `json:"excludedays, omitempty"`
 	// Booking days
-	BookingDays []string `json:"bookingdays, omitempty"`
+	// BookingDays []string `json:"bookingdays, omitempty"`
 }
 
 func ConfigBookingDates(s *mgo.Session) func(w http.ResponseWriter, r *http.Request) {
@@ -66,55 +65,5 @@ func ConfigBookingDates(s *mgo.Session) func(w http.ResponseWriter, r *http.Requ
 		w.Header().Set("Content-Type", "application/json")
 		w.Header().Set("Location", r.URL.Path + "/0")
 		w.WriteHeader(http.StatusCreated)
-	}
-}
-
-func BookingDates(s *mgo.Session) func(w http.ResponseWriter, r *http.Request) {
-	return func(w http.ResponseWriter, r *http.Request) {
-
-		// Copy and launch a Mongo session
-		session := s.Copy()
-		defer session.Close()
-
-		// Open config collections
-		dbc := session.DB("tickets").C("config")
-
-		var config BookingConfig
-		// Find the configuration file
-		err := dbc.Find(bson.M{"id": 0}).One(&config)
-		if err != nil {
-			ErrorWithJSON(w, "Database error, failed to find config!", http.StatusInternalServerError)
-			log.Println("Failed to find config: ", err)
-			return
-		}
-
-		if len(config.BookingDays) == 0 {
-			ErrorWithJSON(w, "Config not found", http.StatusNotFound)
-			log.Println("Configuration with id not found: ", err)
-			return
-		}
-
-		var bookingdates []string
-		// Start date as tomorrow
-		startdate := time.Now().Local().AddDate(0, 0, 1)
-		
-		// End date as 90 days (3 months) from tomorrow
-		enddate := startdate.AddDate(0, 0, 90)
-		
-		// Iterate over dates to print all allowed dates
-		for d := startdate; d != enddate; d = d.AddDate(0, 0, 1) {
-			// Exclude weekends (0 - Sunday, 6 - Saturday)
-			if d.Weekday() != 0 {
-				bookingdates = append(bookingdates, d.Format("2006-01-02"))
-			}
-		}
-		
-		// Marshall booking dates
-		respBody, err := json.MarshalIndent(bookingdates, "", "  ")
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		ResponseWithJSON(w, respBody, http.StatusOK)
 	}
 }
