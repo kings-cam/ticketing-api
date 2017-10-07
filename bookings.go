@@ -69,11 +69,11 @@ func BookingDates(s *mgo.Session) func(w http.ResponseWriter, r *http.Request) {
 		enddate := startdate.AddDate(0, 0, 90)
 
 		// Exclude dates
-		excludedates := config.ExcludeDays
+		excludedates := config.ExcludeDates
 		log.Println(excludedates)
 
 		// Exclude days
-		excludedays := []time.Weekday{0,6}
+		excludedays := config.ExcludeDays
 		
 		// Iterate over dates to print all allowed dates
 		for d := startdate; d != enddate; d = d.AddDate(0, 0, 1) {

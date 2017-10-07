@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"time"
 
 	// Mongo DB
 	"gopkg.in/mgo.v2"
@@ -12,16 +13,14 @@ import (
 
 type BookingConfig struct {
 	ID int `json:"id"`
-	// Start date for booking
-	// StartDate string `json:"startdate, omitempty"`
-	// Number of days from start date
-	// EndDays int `json:"enddays, omitempty"`
-	// Exclude days
-	ExcludeDays []string `json:"excludedays, omitempty"`
-	// Booking days
-	// BookingDays []string `json:"bookingdays, omitempty"`
+	// Exclude dates
+	ExcludeDates []string `json:"excludedates, omitempty"`
+	// Exclude days (0 - Sunday, 6 - Saturday)
+	ExcludeDays []time.Weekday `json:"excludedays, omitempty"`
 }
 
+
+// ConfigBookingDates assign excludedays and dates
 func ConfigBookingDates(s *mgo.Session) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		session := s.Copy()
