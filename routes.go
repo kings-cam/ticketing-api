@@ -112,4 +112,22 @@ func Routes(apiv1router *mux.Router, session *mgo.Session) {
 
 	// Test booking dates
 	apiv1router.HandleFunc("/test/dates", BookingDates(session, true)).Methods("GET")
+
+	// Bookings
+	// Return all bookings
+	apiv1router.HandleFunc("/bookings", GetBookings(session)).Methods("GET")
+
+	// Get existing analysis
+	apiv1router.HandleFunc("/bookings/{uuid}", GetBooking(session)).Methods("GET")
+
+	// Create a new analysis
+	apiv1router.HandleFunc("/bookings/{uuid}", CreateBooking(session)).Methods("POST")
+
+	// Update an existing analysis
+	apiv1router.HandleFunc("/bookings/{uuid}", UpdateBooking(session)).Methods("PUT")
+	
+	// Delete an existing analysis
+	apiv1router.HandleFunc("/bookings/{uuid}", DeleteBooking(session)).Methods("DELETE")
+
+
 }
