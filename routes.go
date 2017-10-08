@@ -110,5 +110,5 @@ func Routes(apiv1router *mux.Router, session *mgo.Session) {
 	apiv1router.HandleFunc("/test/config/dates", ConfigBookingDates(session, true)).Methods("POST")
 
 	// Test booking dates
-	apiv1router.HandleFunc("/dates", BookingDates(session, true)).Methods("GET")
+	apiv1router.HandleFunc("/test/dates", BookingDates(session, true)).Methods("GET")
 }
