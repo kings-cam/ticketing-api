@@ -27,7 +27,7 @@ type BookingConfig struct {
 
 
 // ConfigBookingDates assign excludedays and dates
-func ConfigBookingDates(s *mgo.Session) func(w http.ResponseWriter, r *http.Request) {
+func ConfigBookingDates(s *mgo.Session, test bool) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		session := s.Copy()
 		defer session.Close()
@@ -42,11 +42,19 @@ func ConfigBookingDates(s *mgo.Session) func(w http.ResponseWriter, r *http.Requ
 			return
 		}
 
-		// Open config collection
-		c := session.DB("tickets").C("config")
+		// Test Config DB or Production config
+		var configtable string
+		if (test) {
+			configtable = "testconfig"
+		} else {
+			configtable = "config"
+		}
+
+		// Open config collections
+		dbc := session.DB("tickets").C(configtable)
 
 		// Try to update if configuration is found
-		err = c.Update(bson.M{"id": 0}, &config)
+		err = dbc.Update(bson.M{"id": 0}, &config)
 		if err != nil {
 			switch err {
 			default:
@@ -56,7 +64,7 @@ func ConfigBookingDates(s *mgo.Session) func(w http.ResponseWriter, r *http.Requ
 			// Configuration is not present, do an insert
 			case mgo.ErrNotFound:
 				log.Println("Config not present, creating a new config")
-				err = c.Insert(&config)
+				err = dbc.Insert(&config)
 
 				if err != nil {
 					ErrorWithJSON(w, "Database error", http.StatusInternalServerError)
@@ -66,7 +74,7 @@ func ConfigBookingDates(s *mgo.Session) func(w http.ResponseWriter, r *http.Requ
 			}
 		}
 
-		err = createBookingDates(session)
+		err = createBookingDates(session, test)
 		if err != nil {
 			switch err {
 			default:

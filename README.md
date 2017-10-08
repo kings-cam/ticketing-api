@@ -46,4 +46,5 @@ curl http://localhost:4000/api/v1/stats | python -m "json.tool"
 # Config
 ```
 curl -X POST -H "Content-Type: application/json" -d @config.json http://localhost:4000/api/v1/config/dates
+curl -X POST -H "Content-Type: application/json" -d @price.json http://localhost:4000/api/v1/config/prices
 ```

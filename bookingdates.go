@@ -52,13 +52,21 @@ func dayinexcludedates(date time.Time, excludedates []string) bool {
 }
 
 // createBookingDates generates allowed booking dates
-func createBookingDates(s *mgo.Session) error {
+func createBookingDates(s *mgo.Session, test bool) error {
 	// Copy and launch a Mongo session
 	session := s.Copy()
 	defer session.Close()
 	
+	// Test Config DB or Production config
+	var configtable string
+	if (test) {
+		configtable = "testconfig"
+	} else {
+		configtable = "config"
+	}
+	
 	// Open config collections
-	dbc := session.DB("tickets").C("config")
+	dbc := session.DB("tickets").C(configtable)
 	
 	var config BookingConfig
 	// Find the configuration file
@@ -122,17 +130,26 @@ func createBookingDates(s *mgo.Session) error {
 
 
 // BookingDates return allowable booking days
-func BookingDates(s *mgo.Session) func(w http.ResponseWriter, r *http.Request) {
+func BookingDates(s *mgo.Session, test bool) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 
 		// Copy and launch a Mongo session
 		session := s.Copy()
 		defer session.Close()
 
+		// Test Config DB or Production config
+		var configtable string
+		if (test) {
+			configtable = "testconfig"
+		} else {
+			configtable = "config"
+		}
+
 		// Open config collections
-		dbc := session.DB("tickets").C("config")
+		dbc := session.DB("tickets").C(configtable)
 
 		var config BookingConfig
+		
 		// Find the configuration file
 		err := dbc.Find(bson.M{"id": 0}).One(&config)
 		if err != nil {
