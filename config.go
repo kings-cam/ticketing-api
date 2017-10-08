@@ -13,6 +13,8 @@ import (
 
 type BookingConfig struct {
 	ID int `json:"id"`
+	// Typical number of tickets per session
+	NTickets int `json:"ntickets"`
 	// Exclude dates
 	ExcludeDates []string `json:"excludedates, omitempty"`
 	// Exclude days (0 - Sunday, 6 - Saturday)
