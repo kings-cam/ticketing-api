@@ -12,6 +12,8 @@ import (
 
 type BookingConfig struct {
 	ID int `json:"id"`
+	// Number of days tickets are on sale
+	NDays int `json:"ndays"`
 	// Typical number of tickets in the morning session
 	NMorningTickets int `json:"nmorningtickets"`
 	// Typical number of tickets in the evening session

@@ -67,7 +67,7 @@ func createBookingDates(s *mgo.Session, test bool) error {
 	startdate := time.Now().Local().AddDate(0, 0, 1)
 	
 	// End date as 90 days (3 months) from tomorrow
-	enddate := startdate.AddDate(0, 0, 90)
+	enddate := startdate.AddDate(0, 0, config.NDays)
 	
 	// Exclude dates
 	excludedates := config.ExcludeDates
