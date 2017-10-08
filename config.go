@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
-	"time"
 
 	// Mongo DB
 	"gopkg.in/mgo.v2"
@@ -20,7 +19,7 @@ type BookingConfig struct {
 	// Exclude dates
 	ExcludeDates []string `json:"excludedates, omitempty"`
 	// Exclude days (0 - Sunday, 6 - Saturday)
-	ExcludeDays []time.Weekday `json:"excludedays, omitempty"`
+	ExcludeDays []bool `json:"excludedays, omitempty"`
 	// Booking dates
 	BookingDates []string `json:"bookingdates, omitempty"`
 }

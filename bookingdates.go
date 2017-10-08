@@ -22,22 +22,6 @@ type DateSession struct {
 }
 
 
-
-// dayinexcludedays returns true if the day is found in excluded days
-func dayinexcludedays(d time.Time, excludedays []time.Weekday) bool {
-	// Get day 
-	day := d.Weekday()
-	
-	excludeday := false
-	// Check if the given day is in the exclude list
-	for i := range excludedays {
-		if excludedays[i] == day {
-			excludeday = true
-		}
-	}
-	return excludeday
-}
-
 // dayinexcludedates returns true if the day is found in excluded days
 func dayinexcludedates(date time.Time, excludedates []string) bool {
 	// Get day 
@@ -94,7 +78,7 @@ func createBookingDates(s *mgo.Session, test bool) error {
 	// Iterate over dates to print all allowed dates
 	for d := startdate; d != enddate; d = d.AddDate(0, 0, 1) {
 		// Exclude weekends (0 - Sunday, 6 - Saturday)
-		if (!dayinexcludedays(d, excludedays) &&
+		if (!excludedays[d.Weekday()] &&
 			!dayinexcludedates(d, excludedates)) {
 			bookingdates = append(bookingdates, d.Format("2006-01-02"))
 		}

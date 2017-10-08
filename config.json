@@ -1,7 +1,6 @@
 {
-    "id": 0,
     "nmorningtickets": 500,
     "nafternoontickets": 500,
-    "excludedays": [0, 6],
+    "excludedays": [true, false, false, false, false, false, true],
     "excludedates": ["2017-10-25", "2017-10-26", "2017-11-28", "2017-12-27"]
 }
