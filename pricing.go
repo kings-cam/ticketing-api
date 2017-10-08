@@ -71,3 +71,33 @@ func ConfigPricing(s *mgo.Session) func(w http.ResponseWriter, r *http.Request) 
 		w.WriteHeader(http.StatusCreated)
 	}
 }
+
+
+// GetPrices returns ticket prices
+func GetPrices(s *mgo.Session) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		session := s.Copy()
+		defer session.Close()
+
+		var pricing Pricing
+
+		// Open price collection
+		dbc := session.DB("tickets").C("pricing")
+		
+		// Find the pricing file
+		err := dbc.Find(bson.M{"id": 0}).One(&pricing)
+		if err != nil {
+			ErrorWithJSON(w, "Database error, failed to find pricing!", http.StatusInternalServerError)
+			log.Println("Failed to find pricing: ", err)
+			return
+		}
+
+		// Marshall booking dates
+		respBody, err := json.MarshalIndent(pricing, "", "  ")
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		ResponseWithJSON(w, respBody, http.StatusOK)
+	}
+}
