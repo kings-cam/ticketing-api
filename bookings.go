@@ -68,7 +68,7 @@ func GetBookings(s *mgo.Session) func(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// Bookings returns all bookings
+// GetBooking returns booking with a matching uuid
 // BUG(r) This function returns a booking matching uuid
 func GetBooking(s *mgo.Session) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -94,6 +94,40 @@ func GetBooking(s *mgo.Session) func(w http.ResponseWriter, r *http.Request) {
 
 		// Marshall booking
 		respBody, err := json.MarshalIndent(booking, "", "  ")
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		ResponseWithJSON(w, respBody, http.StatusOK)
+	}
+}
+
+// GetBookingsDate returns booking matching a date
+// BUG(r) This function returns a booking matching uuid
+func GetBookingsDate(s *mgo.Session) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		// Copy and launch a Mongo session
+		session := s.Copy()
+		defer session.Close()
+
+		// Open bookings collections
+		dbc := session.DB("tickets").C("bookings")
+
+		vars := mux.Vars(r)
+		date := vars["date"]
+
+		var bookings []Booking
+
+		// Find all bookings matching the date
+		err := dbc.Find(bson.M{"date": date}).All(&bookings)
+		if err != nil {
+			ErrorWithJSON(w, "Database error, failed to find booking with date!", http.StatusInternalServerError)
+			log.Println("Failed to find booking with the specified date: ", err)
+			return
+		}
+
+		// Marshall booking
+		respBody, err := json.MarshalIndent(bookings, "", "  ")
 		if err != nil {
 			log.Fatal(err)
 		}
