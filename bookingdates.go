@@ -11,6 +11,16 @@ import (
 	"gopkg.in/mgo.v2/bson"
 )
 
+type DateSession struct {
+	Date string `json:"date"`
+	// Typical number of tickets in the morning session
+	NMorningTickets int `json:"nmorningtickets"`
+	// Typical number of tickets in the evening session
+	NAfternoonTickets int `json:"nafternoontickets"`
+}
+
+
+
 // dayinexcludedays returns true if the day is found in excluded days
 func dayinexcludedays(d time.Time, excludedays []time.Weekday) bool {
 	// Get day 
@@ -39,7 +49,7 @@ func dayinexcludedates(date time.Time, excludedates []string) bool {
 	return excludedate
 }
 
-// BookingDates return allowable booking days
+// createBookingDates generates allowed booking dates
 func createBookingDates(s *mgo.Session) error {
 	// Copy and launch a Mongo session
 	session := s.Copy()
@@ -94,6 +104,17 @@ func createBookingDates(s *mgo.Session) error {
 			return err
 		}
 	}
+
+	// Create session for dates
+	var newdate DateSession
+	newdate.NMorningTickets = config.NMorningTickets
+	newdate.NAfternoonTickets = config.NAfternoonTickets
+
+	for _, bd := range bookingdates {
+		newdate.Date = bd
+		// Do not update existing sessions
+		err = createBookingSessions(session, &newdate, false)
+	}
 	return err
 }
 
@@ -126,4 +147,43 @@ func BookingDates(s *mgo.Session) func(w http.ResponseWriter, r *http.Request) {
 
 		ResponseWithJSON(w, respBody, http.StatusOK)
 	}
+}
+
+
+// createBookingSessions generates allowed booking dates
+func createBookingSessions(s *mgo.Session, date *DateSession, update bool) error {
+	// Copy and launch a Mongo session
+	session := s.Copy()
+	defer session.Close()
+	
+	// Open config collections
+	dbc := session.DB("tickets").C("dates")
+
+	var err error
+	
+	if (update) {
+		// Try to update if date is found
+		err = dbc.Update(bson.M{"date": date.Date}, &date)
+	} else {
+		// Create a new insert
+		var newdate DateSession
+		// Find id date exists
+		err = dbc.Find(bson.M{"date": date.Date}).One(&newdate)
+	}		
+	if err != nil {
+		switch err {
+		default:
+			log.Println("Failed to update date: ", err)
+			return err
+			// Configuration is not present, do an insert
+		case mgo.ErrNotFound:
+			// Date not present, creating a new date/session
+			err = dbc.Insert(&date)
+			if err != nil {
+				log.Println("Failed to insert session: ", err)
+				return err
+			}
+		}
+	}
+	return err
 }
