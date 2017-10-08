@@ -93,3 +93,43 @@ func ConfigBookingDates(s *mgo.Session, test bool) func(w http.ResponseWriter, r
 		w.WriteHeader(http.StatusCreated)
 	}
 }
+
+
+// BookingDates return allowable booking days
+func GetConfigDates(s *mgo.Session, test bool) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+
+		// Copy and launch a Mongo session
+		session := s.Copy()
+		defer session.Close()
+
+		// Test Config DB or Production config
+		var configtable string
+		if (test) {
+			configtable = "testconfig"
+		} else {
+			configtable = "config"
+		}
+
+		// Open config collections
+		dbc := session.DB("tickets").C(configtable)
+
+		var config BookingConfig
+		
+		// Find the configuration file
+		err := dbc.Find(bson.M{"id": 0}).One(&config)
+		if err != nil {
+			ErrorWithJSON(w, "Database error, failed to find config!", http.StatusInternalServerError)
+			log.Println("Failed to find config: ", err)
+			return
+		}
+
+		// Marshall booking dates
+		respBody, err := json.MarshalIndent(config, "", "  ")
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		ResponseWithJSON(w, respBody, http.StatusOK)
+	}
+}
