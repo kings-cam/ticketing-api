@@ -25,8 +25,8 @@ type Pricing struct {
 }
 
 
-// ConfitPricing assigns ticket prices
-func ConfitPricing(s *mgo.Session) func(w http.ResponseWriter, r *http.Request) {
+// ConfigPricing assigns ticket prices
+func ConfigPricing(s *mgo.Session) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		session := s.Copy()
 		defer session.Close()
