@@ -31,7 +31,7 @@ func main() {
 	session.SetMode(mgo.Monotonic, true)
 
 	// Ensure Index
-	// tickets.EnsureIndex(session)
+	tickets.EnsureIndex(session)
 
 	// Create API v1 routes
 	apiv1router := tickets.V1Router(apirouter)
