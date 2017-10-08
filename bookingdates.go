@@ -9,6 +9,8 @@ import (
 	// Mongo DB
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
+	// Gorilla Mux
+	"github.com/gorilla/mux"
 )
 
 type DateSession struct {
@@ -187,3 +189,39 @@ func createBookingSessions(s *mgo.Session, date *DateSession, update bool) error
 	}
 	return err
 }
+
+
+// BookingSessions return ntickets for each session in a day
+func BookingSessions(s *mgo.Session) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+
+		// Copy and launch a Mongo session
+		session := s.Copy()
+		defer session.Close()
+
+		// Open dates collections
+		dbc := session.DB("tickets").C("dates")
+
+		// date
+		params := mux.Vars(r)
+		sessiondate := params["date"]
+
+
+		var sess DateSession
+		// Find the configuration file
+		err := dbc.Find(bson.M{"date": sessiondate}).One(&sess)
+		if err != nil {
+			ErrorWithJSON(w, "Database error, failed to find date!", http.StatusInternalServerError)
+			log.Println("Failed to find date: ", err)
+			return
+		}
+
+		// Marshall booking dates
+		respBody, err := json.MarshalIndent(sess, "", "  ")
+		if err != nil {
+			log.Fatal(err)
+		}
+		ResponseWithJSON(w, respBody, http.StatusOK)
+	}
+}
+
