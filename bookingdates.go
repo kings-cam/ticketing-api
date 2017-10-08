@@ -40,6 +40,65 @@ func dayinexcludedates(date time.Time, excludedates []string) bool {
 }
 
 // BookingDates return allowable booking days
+func createBookingDates(s *mgo.Session) error {
+	// Copy and launch a Mongo session
+	session := s.Copy()
+	defer session.Close()
+	
+	// Open config collections
+	dbc := session.DB("tickets").C("config")
+	
+	var config BookingConfig
+	// Find the configuration file
+	err := dbc.Find(bson.M{"id": 0}).One(&config)
+	if err != nil {
+		log.Println("Failed to find config: ", err)
+		return err
+	}
+
+	// Booking dates
+	var bookingdates []string
+	
+	// Start date as tomorrow
+	startdate := time.Now().Local().AddDate(0, 0, 1)
+	
+	// End date as 90 days (3 months) from tomorrow
+	enddate := startdate.AddDate(0, 0, 90)
+	
+	// Exclude dates
+	excludedates := config.ExcludeDates
+	
+	// Exclude days
+	excludedays := config.ExcludeDays
+	
+	// Iterate over dates to print all allowed dates
+	for d := startdate; d != enddate; d = d.AddDate(0, 0, 1) {
+		// Exclude weekends (0 - Sunday, 6 - Saturday)
+		if (!dayinexcludedays(d, excludedays) &&
+			!dayinexcludedates(d, excludedates)) {
+			bookingdates = append(bookingdates, d.Format("2006-01-02"))
+		}
+	}
+	config.BookingDates = bookingdates
+	
+	// Insert bookingdates to database
+	err = dbc.Update(bson.M{"id": 0}, &config)
+
+        if err != nil {
+		switch err {
+		default:
+			log.Println("Failed to update bookingdates: ", err)
+			return err
+		case mgo.ErrNotFound:
+			log.Println("Error config not found: ", err)
+			return err
+		}
+	}
+	return err
+}
+
+
+// BookingDates return allowable booking days
 func BookingDates(s *mgo.Session) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 
@@ -59,33 +118,8 @@ func BookingDates(s *mgo.Session) func(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		// Booking dates
-		var bookingdates []string
-
-		// Start date as tomorrow
-		startdate := time.Now().Local().AddDate(0, 0, 1)
-		
-		// End date as 90 days (3 months) from tomorrow
-		enddate := startdate.AddDate(0, 0, 90)
-
-		// Exclude dates
-		excludedates := config.ExcludeDates
-		log.Println(excludedates)
-
-		// Exclude days
-		excludedays := config.ExcludeDays
-		
-		// Iterate over dates to print all allowed dates
-		for d := startdate; d != enddate; d = d.AddDate(0, 0, 1) {
-			// Exclude weekends (0 - Sunday, 6 - Saturday)
-			if (!dayinexcludedays(d, excludedays) &&
-				!dayinexcludedates(d, excludedates)) {
-				bookingdates = append(bookingdates, d.Format("2006-01-02"))
-			}
-		}
-		
 		// Marshall booking dates
-		respBody, err := json.MarshalIndent(bookingdates, "", "  ")
+		respBody, err := json.MarshalIndent(config.BookingDates, "", "  ")
 		if err != nil {
 			log.Fatal(err)
 		}

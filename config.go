@@ -17,6 +17,8 @@ type BookingConfig struct {
 	ExcludeDates []string `json:"excludedates, omitempty"`
 	// Exclude days (0 - Sunday, 6 - Saturday)
 	ExcludeDays []time.Weekday `json:"excludedays, omitempty"`
+	// Booking dates
+	BookingDates []string `json:"bookingdates, omitempty"`
 }
 
 
@@ -57,6 +59,18 @@ func ConfigBookingDates(s *mgo.Session) func(w http.ResponseWriter, r *http.Requ
 					log.Println("Failed to insert config: ", err)
 					return
 				}
+			}
+		}
+
+		err = createBookingDates(session)
+		if err != nil {
+			switch err {
+			default:
+				ErrorWithJSON(w, "Database error, failed to update project", http.StatusInternalServerError)
+				return
+			case mgo.ErrNotFound:
+				ErrorWithJSON(w, "Project not found", http.StatusNotFound)
+				return
 			}
 		}
 
