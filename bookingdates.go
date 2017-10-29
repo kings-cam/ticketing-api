@@ -142,8 +142,25 @@ func BookingDates(s *mgo.Session, test bool) func(w http.ResponseWriter, r *http
 			return
 		}
 
+		// Start date as tomorrow
+		startdate := time.Now().Local().AddDate(0, 0, 1)
+
+		// Booking dates
+		var bookingdates []string
+
+		datelayout := "2006-01-02"
+		// Check if booking date is more than the current date
+		for _, bookingdate := range config.BookingDates {
+			t, err := time.Parse(datelayout, bookingdate)
+			if err == nil {
+				if (t.Sub(startdate) >= 0) {
+					bookingdates = append(bookingdates, bookingdate)
+				}
+			}
+		}
+
 		// Marshall booking dates
-		respBody, err := json.MarshalIndent(config.BookingDates, "", "  ")
+		respBody, err := json.MarshalIndent(bookingdates, "", "  ")
 		if err != nil {
 			log.Fatal(err)
 		}
