@@ -1,6 +1,8 @@
 package tickets
 
 import (
+	"crypto/tls"
+	"net"
 	// Paths
 	"os"
 	// MongoDB driver
@@ -15,7 +17,21 @@ type DB struct {
 
 // Connect to MongoDB instance
 func (db *DB) Dial() (s *mgo.Session, err error) {
-	return mgo.Dial(DBUrl())
+	// TLS
+	tlsConfig := &tls.Config{}
+	tlsConfig.InsecureSkipVerify = true
+
+	// fmt.Println("MongoHost:", os.Getenv("MongoHost"))
+	//connect URL:
+	// "mongodb://<username>:<password>@<hostname>:<port>,<hostname>:<port>/<db-name>
+	dialInfo, err := mgo.ParseURL("mongodb://" + os.Getenv("MongoUser") + ":" + os.Getenv("MongoPW") + "@kings-shard-00-00-zzes4.mongodb.net:" + os.Getenv("MongoPort") + ",kings-shard-00-01-zzes4.mongodb.net:" + os.Getenv("MongoPort") + ",kings-shard-00-02-zzes4.mongodb.net:" + os.Getenv("MongoPort") + "/")
+	dialInfo.DialServer = func(addr *mgo.ServerAddr) (net.Conn, error) {
+		conn, err := tls.Dial("tcp", addr.String(), tlsConfig)
+		return conn, err
+	}
+
+	session, err := mgo.DialWithInfo(dialInfo)
+	return session, err
 }
 
 // Create a DB name tickets
