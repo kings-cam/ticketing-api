@@ -2,5 +2,5 @@
     "nmorningtickets": 500,
     "nafternoontickets": 500,
     "excludedays": [true, false, false, false, false, false, true],
-    "excludedates": ["2017-10-25", "2017-10-26", "2017-11-28", "2017-12-27"]
+    "excludedates": ["2017-11-25", "2017-11-26", "2017-12-28", "2017-12-27"]
 }
