@@ -36,6 +36,10 @@ func main() {
 	// Create API v1 routes
 	apiv1router := tickets.V1Router(apirouter)
 	tickets.Routes(apiv1router, session)
+	
+	// Create API v1 routes
+	apiv1configrouter := tickets.V1CONFIGRouter(apirouter)
+	tickets.ConfigRoutes(apiv1configrouter, session)
 
 	// Create and launch server
 	log.Println("Launching web api in http://localhost"+port)

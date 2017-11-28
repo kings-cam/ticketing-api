@@ -7,9 +7,9 @@ import (
 	// CORS
 	"github.com/rs/cors"
 	// JWT
-	// "github.com/dgrijalva/jwt-go"
+	"github.com/dgrijalva/jwt-go"
 	// JSON Web Tokens middleware Auth0
-	// "github.com/auth0/go-jwt-middleware"
+	"github.com/auth0/go-jwt-middleware"
 	// Mongodb
 	"gopkg.in/mgo.v2"
 	// Gorilla Mux
@@ -51,22 +51,12 @@ func V1Router(apirouter *mux.Router) *mux.Router {
 
 	})
 
-/*
-	// Auth0 JWT middleware
-	jwtMiddleware := jwtmiddleware.New(jwtmiddleware.Options{
-		ValidationKeyGetter: func(token *jwt.Token) (interface{}, error) {
-			return []byte("dsAREIWkSHee604VTbq4kJf0imEeWwdC"), nil
-		},
-		SigningMethod: jwt.SigningMethodHS256,
-	})
-*/
 	
 	// API V1 router
 	apiv1router := mux.NewRouter().PathPrefix("/api/v1").Subrouter().StrictSlash(true)
 	apirouter.PathPrefix("/api/v1").Handler(negroni.New(
 		negroni.NewRecovery(),
 		negroni.NewLogger(),
-		// negroni.HandlerFunc(jwtMiddleware.HandlerWithNext),
 		statsmw,
 		corsmw,
 		negroni.Wrap(apiv1router),
@@ -81,6 +71,49 @@ func V1Router(apirouter *mux.Router) *mux.Router {
 	})
 
 	return apiv1router
+}
+
+
+func V1CONFIGRouter(apirouter *mux.Router) *mux.Router {
+	// Stats middleware
+	statsmw := stats.New()
+
+	// CORS for cross-domain access controls
+	corsmw := cors.New(cors.Options{
+		AllowedOrigins: []string{"*"},
+		AllowedMethods: []string{"GET", "HEAD", "PUT", "PATCH", "POST", "DELETE"},
+
+	})
+
+	// Auth0 JWT middleware
+	jwtMiddleware := jwtmiddleware.New(jwtmiddleware.Options{
+		ValidationKeyGetter: func(token *jwt.Token) (interface{}, error) {
+			return []byte("dsAREIWkSHee604VTbq4kJf0imEeWwdC"), nil
+		},
+		SigningMethod: jwt.SigningMethodHS256,
+	})
+
+	
+	// API V1CONFIG router
+	apiconfigrouter := mux.NewRouter().PathPrefix("/config").Subrouter().StrictSlash(true)
+	apirouter.PathPrefix("/config").Handler(negroni.New(
+		negroni.NewRecovery(),
+		negroni.NewLogger(),
+		negroni.HandlerFunc(jwtMiddleware.HandlerWithNext),
+		statsmw,
+		corsmw,
+		negroni.Wrap(apiconfigrouter),
+	))
+
+	// Stats
+	apiconfigrouter.HandleFunc("/stats", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		stats := statsmw.Data()
+		b, _ := json.Marshal(stats)
+		w.Write(b)
+	})
+
+	return apiconfigrouter
 }
 
 // Routes define API version 1.0  router for tickets package
@@ -99,41 +132,47 @@ func Routes(apiv1router *mux.Router, session *mgo.Session) {
 	// Get pricing
 	apiv1router.HandleFunc("/prices", GetPrices(session)).Methods("GET")
 	
-	// Configuration
+	// Create a new booking
+	apiv1router.HandleFunc("/bookings/{uuid}", CreateBooking(session)).Methods("POST")
+}
+
+
+
+// Routes define API version 1.0  router for tickets package
+func ConfigRoutes(apiv1router *mux.Router, session *mgo.Session) {
+	// API version 1.0 welcome
+	apiv1router.HandleFunc("/", func (w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte("Ticketing API config version 1!\n"))
+	})
+
 	// Config Booking dates
-	apiv1router.HandleFunc("/config/dates", ConfigBookingDates(session, false)).Methods("POST")
+	apiv1router.HandleFunc("/dates", ConfigBookingDates(session, false)).Methods("POST")
 
 	// Get Config Booking dates
-	apiv1router.HandleFunc("/config/dates", GetConfigDates(session, false)).Methods("GET")
+	apiv1router.HandleFunc("/dates", GetConfigDates(session, false)).Methods("GET")
 
 	// Config Booking dates
-	apiv1router.HandleFunc("/config/prices", ConfigPricing(session)).Methods("POST")
+	apiv1router.HandleFunc("/prices", ConfigPricing(session)).Methods("POST")
 
 	// Test configuration
 	// Test config Booking dates
-	apiv1router.HandleFunc("/test/config/dates", ConfigBookingDates(session, true)).Methods("POST")
+	apiv1router.HandleFunc("/test/dates", ConfigBookingDates(session, true)).Methods("POST")
 
 	// Test booking dates
 	apiv1router.HandleFunc("/test/dates", BookingDates(session, true)).Methods("GET")
 
-	// Bookings
+	// Get existing booking
+	apiv1router.HandleFunc("/bookings/{uuid}", GetBooking(session)).Methods("GET")
 	// Return all bookings
 	apiv1router.HandleFunc("/bookings", GetBookings(session)).Methods("GET")
 
 	// Return all bookings matching a date
 	apiv1router.HandleFunc("/bookings/date/{date}", GetBookingsDate(session)).Methods("GET")
 
-	// Get existing booking
-	apiv1router.HandleFunc("/bookings/{uuid}", GetBooking(session)).Methods("GET")
-
-	// Create a new booking
-	apiv1router.HandleFunc("/bookings/{uuid}", CreateBooking(session)).Methods("POST")
-
 	// Update an existing booking
 	apiv1router.HandleFunc("/bookings/{uuid}", UpdateBooking(session)).Methods("PUT")
 	
 	// Delete an existing booking
 	apiv1router.HandleFunc("/bookings/{uuid}", DeleteBooking(session)).Methods("DELETE")
-
 
 }
