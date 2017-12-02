@@ -48,7 +48,8 @@ func V1Router(apirouter *mux.Router) *mux.Router {
 	corsmw := cors.New(cors.Options{
 		AllowedOrigins: []string{"*"},
 		AllowedMethods: []string{"GET", "HEAD", "PUT", "PATCH", "POST", "DELETE"},
-
+		AllowCredentials: true,
+		AllowedHeaders: []string{"*"},
 	})
 
 	
@@ -82,7 +83,8 @@ func V1CONFIGRouter(apirouter *mux.Router) *mux.Router {
 	corsmw := cors.New(cors.Options{
 		AllowedOrigins: []string{"*"},
 		AllowedMethods: []string{"GET", "HEAD", "PUT", "PATCH", "POST", "DELETE"},
-
+		AllowCredentials: true,
+		AllowedHeaders: []string{"*"},
 	})
 
 	// Auth0 JWT middleware
