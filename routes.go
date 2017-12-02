@@ -90,7 +90,7 @@ func V1CONFIGRouter(apirouter *mux.Router) *mux.Router {
 	// Auth0 JWT middleware
 	jwtMiddleware := jwtmiddleware.New(jwtmiddleware.Options{
 		ValidationKeyGetter: func(token *jwt.Token) (interface{}, error) {
-			return []byte("dsAREIWkSHee604VTbq4kJf0imEeWwdC"), nil
+			return []byte("JE7PL4KKQI1KBYK1qBM4v3Q7pYrKgs3r"), nil
 		},
 		SigningMethod: jwt.SigningMethodHS256,
 	})
