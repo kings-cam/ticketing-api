@@ -21,10 +21,9 @@ type DateSession struct {
 	NAfternoonTickets int `json:"nafternoontickets"`
 }
 
-
 // dayinexcludedates returns true if the day is found in excluded days
 func dayinexcludedates(date time.Time, excludedates []string) bool {
-	// Get day 
+	// Get day
 	excludedate := false
 	// Check if the given day is in the exclude list
 	for i := range excludedates {
@@ -40,18 +39,18 @@ func createBookingDates(s *mgo.Session, test bool) error {
 	// Copy and launch a Mongo session
 	session := s.Copy()
 	defer session.Close()
-	
+
 	// Test Config DB or Production config
 	var configtable string
-	if (test) {
+	if test {
 		configtable = "testconfig"
 	} else {
 		configtable = "config"
 	}
-	
+
 	// Open config collections
 	dbc := session.DB("tickets").C(configtable)
-	
+
 	var config BookingConfig
 	// Find the configuration file
 	err := dbc.Find(bson.M{"id": 0}).One(&config)
@@ -62,33 +61,33 @@ func createBookingDates(s *mgo.Session, test bool) error {
 
 	// Booking dates
 	var bookingdates []string
-	
+
 	// Start date as tomorrow
 	startdate := time.Now().Local().AddDate(0, 0, 1)
-	
+
 	// End date as 90 days (3 months) from tomorrow
 	enddate := startdate.AddDate(0, 0, config.NDays)
-	
+
 	// Exclude dates
 	excludedates := config.ExcludeDates
-	
+
 	// Exclude days
 	excludedays := config.ExcludeDays
-	
+
 	// Iterate over dates to print all allowed dates
 	for d := startdate; d != enddate; d = d.AddDate(0, 0, 1) {
 		// Exclude weekends (0 - Sunday, 6 - Saturday)
-		if (!excludedays[d.Weekday()] &&
-			!dayinexcludedates(d, excludedates)) {
+		if !excludedays[d.Weekday()] &&
+			!dayinexcludedates(d, excludedates) {
 			bookingdates = append(bookingdates, d.Format("2006-01-02"))
 		}
 	}
 	config.BookingDates = bookingdates
-	
+
 	// Insert bookingdates to database
 	err = dbc.Update(bson.M{"id": 0}, &config)
 
-        if err != nil {
+	if err != nil {
 		switch err {
 		default:
 			log.Println("Failed to update bookingdates: ", err)
@@ -112,7 +111,6 @@ func createBookingDates(s *mgo.Session, test bool) error {
 	return err
 }
 
-
 // BookingDates return allowable booking days
 func BookingDates(s *mgo.Session, test bool) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -123,7 +121,7 @@ func BookingDates(s *mgo.Session, test bool) func(w http.ResponseWriter, r *http
 
 		// Test Config DB or Production config
 		var configtable string
-		if (test) {
+		if test {
 			configtable = "testconfig"
 		} else {
 			configtable = "config"
@@ -133,7 +131,7 @@ func BookingDates(s *mgo.Session, test bool) func(w http.ResponseWriter, r *http
 		dbc := session.DB("tickets").C(configtable)
 
 		var config BookingConfig
-		
+
 		// Find the configuration file
 		err := dbc.Find(bson.M{"id": 0}).One(&config)
 		if err != nil {
@@ -153,7 +151,7 @@ func BookingDates(s *mgo.Session, test bool) func(w http.ResponseWriter, r *http
 		for _, bookingdate := range config.BookingDates {
 			t, err := time.Parse(datelayout, bookingdate)
 			if err == nil {
-				if (t.Sub(startdate) >= 0) {
+				if t.Sub(startdate) >= 0 {
 					bookingdates = append(bookingdates, bookingdate)
 				}
 			}
@@ -169,19 +167,18 @@ func BookingDates(s *mgo.Session, test bool) func(w http.ResponseWriter, r *http
 	}
 }
 
-
 // createBookingSessions generates allowed booking dates
 func createBookingSessions(s *mgo.Session, date *DateSession, update bool) error {
 	// Copy and launch a Mongo session
 	session := s.Copy()
 	defer session.Close()
-	
+
 	// Open config collections
 	dbc := session.DB("tickets").C("dates")
 
 	var err error
-	
-	if (update) {
+
+	if update {
 		// Try to update if date is found
 		err = dbc.Update(bson.M{"date": date.Date}, &date)
 	} else {
@@ -189,7 +186,7 @@ func createBookingSessions(s *mgo.Session, date *DateSession, update bool) error
 		var newdate DateSession
 		// Find id date exists
 		err = dbc.Find(bson.M{"date": date.Date}).One(&newdate)
-	}		
+	}
 	if err != nil {
 		switch err {
 		default:
@@ -208,7 +205,6 @@ func createBookingSessions(s *mgo.Session, date *DateSession, update bool) error
 	return err
 }
 
-
 // BookingSessions return ntickets for each session in a day
 func BookingSessions(s *mgo.Session) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -223,7 +219,6 @@ func BookingSessions(s *mgo.Session) func(w http.ResponseWriter, r *http.Request
 		// date
 		params := mux.Vars(r)
 		sessiondate := params["date"]
-
 
 		var sess DateSession
 		// Find the configuration file
@@ -242,4 +237,3 @@ func BookingSessions(s *mgo.Session) func(w http.ResponseWriter, r *http.Request
 		ResponseWithJSON(w, respBody, http.StatusOK)
 	}
 }
-

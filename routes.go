@@ -20,24 +20,23 @@ import (
 	"github.com/thoas/stats"
 )
 
-
 // Router Returns the mux api router with CORS, stats and logging
 func Router() *mux.Router {
 	apirouter := mux.NewRouter()
-	
+
 	/*
-	//For production, keep HTTPSProtection = true
-	HTTPSProtection := false
-	if HTTPSProtection {
-		app.Use(restgate.New("X-Auth-Key", "X-Auth-Secret", restgate.Static, restgate.Config{HTTPSProtectionOff: false, Key: []string{c.API_ENDPOINT_KEY}, Secret: []string{c.API_ENDPOINT_SECRET}}))
-        */
-		
+		//For production, keep HTTPSProtection = true
+		HTTPSProtection := false
+		if HTTPSProtection {
+			app.Use(restgate.New("X-Auth-Key", "X-Auth-Secret", restgate.Static, restgate.Config{HTTPSProtectionOff: false, Key: []string{c.API_ENDPOINT_KEY}, Secret: []string{c.API_ENDPOINT_SECRET}}))
+	*/
+
 	// API Router
-	apirouter.HandleFunc("/", func (w http.ResponseWriter, r *http.Request) {
+	apirouter.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("Ticketing API\n"))
 	})
-        
-    return apirouter
+
+	return apirouter
 }
 
 func V1Router(apirouter *mux.Router) *mux.Router {
@@ -46,13 +45,12 @@ func V1Router(apirouter *mux.Router) *mux.Router {
 
 	// CORS for cross-domain access controls
 	corsmw := cors.New(cors.Options{
-		AllowedOrigins: []string{"*"},
-		AllowedMethods: []string{"GET", "HEAD", "PUT", "PATCH", "POST", "DELETE"},
+		AllowedOrigins:   []string{"*"},
+		AllowedMethods:   []string{"GET", "HEAD", "PUT", "PATCH", "POST", "DELETE"},
 		AllowCredentials: true,
-		AllowedHeaders: []string{"*"},
+		AllowedHeaders:   []string{"*"},
 	})
 
-	
 	// API V1 router
 	apiv1router := mux.NewRouter().PathPrefix("/api/v1").Subrouter().StrictSlash(true)
 	apirouter.PathPrefix("/api/v1").Handler(negroni.New(
@@ -74,17 +72,16 @@ func V1Router(apirouter *mux.Router) *mux.Router {
 	return apiv1router
 }
 
-
 func V1CONFIGRouter(apirouter *mux.Router) *mux.Router {
 	// Stats middleware
 	statsmw := stats.New()
 
 	// CORS for cross-domain access controls
 	corsmw := cors.New(cors.Options{
-		AllowedOrigins: []string{"*"},
-		AllowedMethods: []string{"GET", "HEAD", "PUT", "PATCH", "POST", "DELETE"},
+		AllowedOrigins:   []string{"*"},
+		AllowedMethods:   []string{"GET", "HEAD", "PUT", "PATCH", "POST", "DELETE"},
 		AllowCredentials: true,
-		AllowedHeaders: []string{"*"},
+		AllowedHeaders:   []string{"*"},
 	})
 
 	// Auth0 JWT middleware
@@ -95,7 +92,6 @@ func V1CONFIGRouter(apirouter *mux.Router) *mux.Router {
 		SigningMethod: jwt.SigningMethodHS256,
 	})
 
-	
 	// API V1CONFIG router
 	apiconfigrouter := mux.NewRouter().PathPrefix("/config").Subrouter().StrictSlash(true)
 	apirouter.PathPrefix("/config").Handler(negroni.New(
@@ -121,7 +117,7 @@ func V1CONFIGRouter(apirouter *mux.Router) *mux.Router {
 // Routes define API version 1.0  router for tickets package
 func Routes(apiv1router *mux.Router, session *mgo.Session) {
 	// API version 1.0 welcome
-	apiv1router.HandleFunc("/", func (w http.ResponseWriter, r *http.Request) {
+	apiv1router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("Ticketing API version 1!\n"))
 	})
 
@@ -133,17 +129,15 @@ func Routes(apiv1router *mux.Router, session *mgo.Session) {
 
 	// Get pricing
 	apiv1router.HandleFunc("/prices", GetPrices(session)).Methods("GET")
-	
+
 	// Create a new booking
 	apiv1router.HandleFunc("/bookings/{uuid}", CreateBooking(session)).Methods("POST")
 }
 
-
-
 // Routes define API version 1.0  router for tickets package
 func ConfigRoutes(apiv1router *mux.Router, session *mgo.Session) {
 	// API version 1.0 welcome
-	apiv1router.HandleFunc("/", func (w http.ResponseWriter, r *http.Request) {
+	apiv1router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("Ticketing API config version 1!\n"))
 	})
 
@@ -173,7 +167,7 @@ func ConfigRoutes(apiv1router *mux.Router, session *mgo.Session) {
 
 	// Update an existing booking
 	apiv1router.HandleFunc("/bookings/{uuid}", UpdateBooking(session)).Methods("PUT")
-	
+
 	// Delete an existing booking
 	apiv1router.HandleFunc("/bookings/{uuid}", DeleteBooking(session)).Methods("DELETE")
 

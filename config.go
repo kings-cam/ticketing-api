@@ -26,7 +26,6 @@ type BookingConfig struct {
 	BookingDates []string `json:"bookingdates, omitempty"`
 }
 
-
 // ConfigBookingDates assign excludedays and dates
 func ConfigBookingDates(s *mgo.Session, test bool) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -45,7 +44,7 @@ func ConfigBookingDates(s *mgo.Session, test bool) func(w http.ResponseWriter, r
 
 		// Test Config DB or Production config
 		var configtable string
-		if (test) {
+		if test {
 			configtable = "testconfig"
 		} else {
 			configtable = "config"
@@ -89,11 +88,10 @@ func ConfigBookingDates(s *mgo.Session, test bool) func(w http.ResponseWriter, r
 
 		// Write response
 		w.Header().Set("Content-Type", "application/json")
-		w.Header().Set("Location", r.URL.Path + "/0")
+		w.Header().Set("Location", r.URL.Path+"/0")
 		w.WriteHeader(http.StatusCreated)
 	}
 }
-
 
 // BookingDates return allowable booking days
 func GetConfigDates(s *mgo.Session, test bool) func(w http.ResponseWriter, r *http.Request) {
@@ -105,7 +103,7 @@ func GetConfigDates(s *mgo.Session, test bool) func(w http.ResponseWriter, r *ht
 
 		// Test Config DB or Production config
 		var configtable string
-		if (test) {
+		if test {
 			configtable = "testconfig"
 		} else {
 			configtable = "config"
@@ -115,7 +113,7 @@ func GetConfigDates(s *mgo.Session, test bool) func(w http.ResponseWriter, r *ht
 		dbc := session.DB("tickets").C(configtable)
 
 		var config BookingConfig
-		
+
 		// Find the configuration file
 		err := dbc.Find(bson.M{"id": 0}).One(&config)
 		if err != nil {

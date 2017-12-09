@@ -24,7 +24,6 @@ type Pricing struct {
 	GuideBooks []string `json:"guidebooks"`
 }
 
-
 // ConfigPricing assigns ticket prices
 func ConfigPricing(s *mgo.Session) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -67,11 +66,10 @@ func ConfigPricing(s *mgo.Session) func(w http.ResponseWriter, r *http.Request) 
 
 		// Write response
 		w.Header().Set("Content-Type", "application/json")
-		w.Header().Set("Location", r.URL.Path + "/0")
+		w.Header().Set("Location", r.URL.Path+"/0")
 		w.WriteHeader(http.StatusCreated)
 	}
 }
-
 
 // GetPrices returns ticket prices
 func GetPrices(s *mgo.Session) func(w http.ResponseWriter, r *http.Request) {
@@ -83,7 +81,7 @@ func GetPrices(s *mgo.Session) func(w http.ResponseWriter, r *http.Request) {
 
 		// Open price collection
 		dbc := session.DB("tickets").C("pricing")
-		
+
 		// Find the pricing file
 		err := dbc.Find(bson.M{"id": 0}).One(&pricing)
 		if err != nil {

@@ -70,7 +70,6 @@ func EnsureIndex(s *mgo.Session) {
 		panic(projecterr)
 	}
 
-
 	dbdates := session.DB("tickets").C("dates")
 
 	datesindex := mgo.Index{

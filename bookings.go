@@ -161,7 +161,6 @@ func CreateBooking(s *mgo.Session) func(w http.ResponseWriter, r *http.Request) 
 			return
 		}
 
-
 		// Check if the URL uuid and the booking JSON UUID match
 		if uuid != booking.UUID || booking.UUID == "" {
 			ErrorWithJSON(w, "Database error, uuid of request doesn't match booking uuid", http.StatusInternalServerError)
