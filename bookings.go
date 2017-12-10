@@ -5,7 +5,8 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-
+	"strconv"
+	
 	// Mongo DB
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
@@ -43,6 +44,22 @@ type Booking struct {
 	Nguides int `json:"nguides, omitempty"`
 	// Guidebooks
 	Guidebooks []string `json:"guidebooks, omitempty"`
+	// Address
+	Address string `json:"address, omitempty"`
+	// City
+	City string `json:"city, omitempty"`
+	// Country
+	Country string `json:"country, omitempty"`
+	// City
+	Postcode string `json:"postcode, omitempty"`
+	// CC Number
+	CCNumber string `json:"ccnumber, omitempty"`
+	// CVV
+	CVV string `json:"cvv, omitempty"`
+	// Nadults
+	Month int `json:"month, omitempty"`
+	// Nchild
+	Year int `json:"year, omitempty"`
 }
 
 // GetBookings returns all bookings
@@ -177,9 +194,20 @@ func CreateBooking(s *mgo.Session) func(w http.ResponseWriter, r *http.Request) 
 
 		// Payment
 		var payment Payment
+		payment.Name = booking.Name
 		payment.OrderDescription = booking.UUID
-		// payment.CardNumber = booking.CardNumber
-
+		payment.CardNumber = booking.CCNumber
+		payment.Cvc = booking.CVV
+		payment.Month = strconv.Itoa(booking.Month)
+		payment.Year = strconv.Itoa(booking.Year)
+		payment.Amount = booking.Total
+		
+		// Clear sensitivite data in booking
+		booking.CCNumber = "0000-0000-0000-0000"
+		booking.CVV = "000"
+		booking.Month = 99
+		booking.Year = 0000
+		
 		// Invoke payment
 		resp := makePayment(&payment)
 		log.Println("response Status:", resp.Status)

@@ -2,6 +2,7 @@ package tickets
 
 import (
 	"bytes"
+	"fmt"
 	"net/http"
 	"os"
 )
@@ -35,9 +36,8 @@ type Payment struct {
 func makePayment(payment *Payment) (response *http.Response) {
 	// WorldPay URL
 	url := "https://api.worldpay.com/v1/orders"
-
 	// Payment string
-	var paymentString = `{"paymentMethod":{ "type":` + `"Card", "name":"cardholder-name", "expiryMonth":"2", "expiryYear":"2010", "cardNumber":"4444333322221111", "cvc":"123", "issueNumber":"" }, "orderType": "ECOM", "orderDescription": "` + payment.OrderDescription + `", "amount": 500, "currencyCode": "GBP"}`
+	var paymentString = `{"paymentMethod":{ "type":` + `"Card", "name":"` + payment.Name + `", "expiryMonth":"` + payment.Month + `", "expiryYear":"` + payment.Year + `", "cardNumber":"` + payment.CardNumber + `", "cvc":"` + payment.Cvc + `", "issueNumber":"" }, "orderType": "ECOM", "orderDescription": "` + payment.OrderDescription + `", "amount": "`  + fmt.Sprintf("%.0f",payment.Amount * 100.) + `", "currencyCode": "GBP"}`
 
 	var jsonStr = []byte(paymentString)
 
@@ -55,3 +55,4 @@ func makePayment(payment *Payment) (response *http.Response) {
 	response = resp
 	return response
 }
+
