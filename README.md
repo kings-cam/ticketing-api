@@ -25,7 +25,7 @@ dep ensure -update
 `mkdir ./db && mongod --dbpath ./db`
 
 ## Run api server
-`MongoUser=<username> MongoPW=<passwd> MongoPort=27017 IP=127.0.0.1 Port=4000 ./api `
+`Auth0=<JWT-SecretKey> MongoUser=<username> MongoPW=<passwd> MongoPort=27017 IP=127.0.0.1 Port=4000 ./api `
 
 # Stats
 
