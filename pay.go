@@ -2,8 +2,6 @@ package tickets
 
 import (
 	"bytes"
-	"fmt"
-	"io/ioutil"
 	"net/http"
 	"os"
 )
@@ -34,12 +32,12 @@ type Payment struct {
 	CurrencyCode string `json:"currencyCode, omitempty"`
 }
 
-func makePayment(payment *Payment) {
+func makePayment(payment *Payment) (response *http.Response) {
 	// WorldPay URL
 	url := "https://api.worldpay.com/v1/orders"
 
 	// Payment string
-	var paymentString = `{"paymentMethod":{ "type":` + `"Card", "name":"cardholder-name", "expiryMonth":"2", "expiryYear":"2018", "cardNumber":"4444333322221111", "cvc":"123", "issueNumber":"" }, "orderType": "ECOM", "orderDescription": "` + payment.OrderDescription + `", "amount": 500, "currencyCode": "GBP"}`
+	var paymentString = `{"paymentMethod":{ "type":` + `"Card", "name":"cardholder-name", "expiryMonth":"2", "expiryYear":"2010", "cardNumber":"4444333322221111", "cvc":"123", "issueNumber":"" }, "orderType": "ECOM", "orderDescription": "` + payment.OrderDescription + `", "amount": 500, "currencyCode": "GBP"}`
 
 	var jsonStr = []byte(paymentString)
 
@@ -54,10 +52,6 @@ func makePayment(payment *Payment) {
 	if err != nil {
 		panic(err)
 	}
-	defer resp.Body.Close()
-
-	fmt.Println("response Status:", resp.Status)
-	fmt.Println("response Headers:", resp.Header)
-	body, _ := ioutil.ReadAll(resp.Body)
-	fmt.Println("response Body:", string(body))
+	response = resp
+	return response
 }

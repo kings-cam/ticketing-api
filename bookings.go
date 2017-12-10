@@ -2,6 +2,7 @@ package tickets
 
 import (
 	"encoding/json"
+	"io/ioutil"
 	"log"
 	"net/http"
 
@@ -23,7 +24,7 @@ type Booking struct {
 	// Gift aid (true / false)
 	Giftaid string `json:"giftaid, omitempty"`
 	// Subscribe (true / false)
-	Subscribe string `json:"subscribe, omitempty"`	
+	Subscribe string `json:"subscribe, omitempty"`
 	// date
 	Date string `json:"date, omitempty"`
 	// Session
@@ -177,26 +178,34 @@ func CreateBooking(s *mgo.Session) func(w http.ResponseWriter, r *http.Request) 
 		// Payment
 		var payment Payment
 		payment.OrderDescription = booking.UUID
+		// payment.CardNumber = booking.CardNumber
 
-		makePayment(&payment)
-		
-		// Insert booking to database
-		err = dbc.Insert(&booking)
-		if err != nil {
-			// Check if a booking with a same UUID exists
-			if mgo.IsDup(err) {
-				ErrorWithJSON(w, "Booking with uuid already exists", http.StatusBadRequest)
+		// Invoke payment
+		resp := makePayment(&payment)
+		log.Println("response Status:", resp.Status)
+		log.Println("response Headers:", resp.Header)
+		body, _ := ioutil.ReadAll(resp.Body)
+		log.Println("response Body:", string(body))
+
+		if resp.StatusCode == http.StatusOK {
+			// Insert booking to database
+			err = dbc.Insert(&booking)
+			if err != nil {
+				// Check if a booking with a same UUID exists
+				if mgo.IsDup(err) {
+					ErrorWithJSON(w, "Booking with uuid already exists", http.StatusBadRequest)
+					return
+				}
+				ErrorWithJSON(w, "Database error, failed to insert booking", http.StatusInternalServerError)
+				log.Println("Failed to insert booking: ", err)
 				return
 			}
-			ErrorWithJSON(w, "Database error, failed to insert booking", http.StatusInternalServerError)
-			log.Println("Failed to insert booking: ", err)
+			// Write response
+			w.Header().Set("Content-Type", "application/json")
+			w.Header().Set("Location", r.URL.Path)
+			w.WriteHeader(http.StatusCreated)
 			return
 		}
-
-		// Write response
-		w.Header().Set("Content-Type", "application/json")
-		w.Header().Set("Location", r.URL.Path)
-		w.WriteHeader(http.StatusCreated)
 	}
 }
 
