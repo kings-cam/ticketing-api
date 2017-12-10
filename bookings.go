@@ -174,6 +174,12 @@ func CreateBooking(s *mgo.Session) func(w http.ResponseWriter, r *http.Request) 
 			return
 		}
 
+		// Payment
+		var payment Payment
+		payment.OrderDescription = booking.UUID
+
+		makePayment(&payment)
+		
 		// Insert booking to database
 		err = dbc.Insert(&booking)
 		if err != nil {
