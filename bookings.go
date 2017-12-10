@@ -18,6 +18,12 @@ type Booking struct {
 	UUID string `json:"uuid, omitempty"`
 	// Name of booking
 	Name string `json:"name, omitempty"`
+	// Email address
+	Email string `json:"email, omitempty"`
+	// Gift aid (true / false)
+	Giftaid string `json:"giftaid, omitempty"`
+	// Subscribe (true / false)
+	Subscribe string `json:"subscribe, omitempty"`	
 	// date
 	Date string `json:"date, omitempty"`
 	// Session
