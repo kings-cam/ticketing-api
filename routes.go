@@ -3,6 +3,7 @@ package tickets
 import (
 	"encoding/json"
 	"net/http"
+	"os"
 
 	// CORS
 	"github.com/rs/cors"
@@ -87,7 +88,7 @@ func V1CONFIGRouter(apirouter *mux.Router) *mux.Router {
 	// Auth0 JWT middleware
 	jwtMiddleware := jwtmiddleware.New(jwtmiddleware.Options{
 		ValidationKeyGetter: func(token *jwt.Token) (interface{}, error) {
-			return []byte("JE7PL4KKQI1KBYK1qBM4v3Q7pYrKgs3r"), nil
+			return []byte(os.Getenv("Auth0")), nil
 		},
 		SigningMethod: jwt.SigningMethodHS256,
 	})
