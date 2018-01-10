@@ -232,12 +232,12 @@ func CreateBooking(s *mgo.Session) func(w http.ResponseWriter, r *http.Request) 
 			}
 
 			// Create a QR code
-			err := qrcode.WriteFile(booking.UUID, qrcode.Medium, 256, "qr.png")
+			err := qrcode.WriteFile("https://store.kings.cam.ac.uk/bookings/"+booking.UUID, qrcode.Medium, 256, booking.UUID+".png")
 
 			if err != nil {
 				log.Println("Failed to create a QR code: ", err)
 			}
-			
+
 			// Write response
 			w.Header().Set("Content-Type", "application/json")
 			w.Header().Set("Location", r.URL.Path)
