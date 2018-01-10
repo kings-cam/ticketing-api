@@ -3,14 +3,14 @@ package tickets
 import (
 	"encoding/json"
 	"net/http"
-	"os"
+	// "os"
 
 	// CORS
 	"github.com/rs/cors"
 	// JWT
-	"github.com/dgrijalva/jwt-go"
+	// "github.com/dgrijalva/jwt-go"
 	// JSON Web Tokens middleware Auth0
-	"github.com/auth0/go-jwt-middleware"
+	// "github.com/auth0/go-jwt-middleware"
 	// Mongodb
 	"gopkg.in/mgo.v2"
 	// Gorilla Mux
@@ -85,7 +85,7 @@ func V1CONFIGRouter(apirouter *mux.Router) *mux.Router {
 		AllowedHeaders:   []string{"*"},
 	})
 
-	
+	/*
 	// Auth0 JWT middleware
 	jwtMiddleware := jwtmiddleware.New(jwtmiddleware.Options{
 		ValidationKeyGetter: func(token *jwt.Token) (interface{}, error) {
@@ -93,13 +93,13 @@ func V1CONFIGRouter(apirouter *mux.Router) *mux.Router {
 		},
 		SigningMethod: jwt.SigningMethodHS256,
 	})
-
+*/
 	// API V1CONFIG router
 	apiconfigrouter := mux.NewRouter().PathPrefix("/config").Subrouter().StrictSlash(true)
 	apirouter.PathPrefix("/config").Handler(negroni.New(
 		negroni.NewRecovery(),
 		negroni.NewLogger(),
-		negroni.HandlerFunc(jwtMiddleware.HandlerWithNext),
+		// negroni.HandlerFunc(jwtMiddleware.HandlerWithNext),
 		statsmw,
 		corsmw,
 		negroni.Wrap(apiconfigrouter),

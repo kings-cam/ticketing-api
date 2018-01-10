@@ -32,6 +32,12 @@
   version = "v1.2"
 
 [[projects]]
+  branch = "master"
+  name = "github.com/skip2/go-qrcode"
+  packages = [".","bitset","reedsolomon"]
+  revision = "cf5f9fa2f0d847edb8e038db7ed975e239095e1a"
+
+[[projects]]
   name = "github.com/stretchr/testify"
   packages = ["assert"]
   revision = "69483b4bd14f5845b5a1e55bca19e954e827f1d0"
@@ -58,6 +64,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "27a6b9af486836775abe5c4590264069afd9892a113a8e1fa047f3b83d33efed"
+  inputs-digest = "74ffdd4570d2475cd59bcc58bdd189137b2f4bee2c16adb708a0c8dcd9348ee4"
   solver-name = "gps-cdcl"
   solver-version = 1

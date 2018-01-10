@@ -6,12 +6,14 @@ import (
 	"log"
 	"net/http"
 	"strconv"
-	
+
 	// Mongo DB
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 	// Gorilla Mux
 	"github.com/gorilla/mux"
+	// QR Code generator
+	"github.com/skip2/go-qrcode"
 )
 
 // Type Booking stores the datastructure for a booking
@@ -201,13 +203,13 @@ func CreateBooking(s *mgo.Session) func(w http.ResponseWriter, r *http.Request) 
 		payment.Month = strconv.Itoa(booking.Month)
 		payment.Year = strconv.Itoa(booking.Year)
 		payment.Amount = booking.Total
-		
+
 		// Clear sensitivite data in booking
 		booking.CCNumber = "0000-0000-0000-0000"
 		booking.CVV = "000"
 		booking.Month = 99
 		booking.Year = 0000
-		
+
 		// Invoke payment
 		resp := makePayment(&payment)
 		log.Println("response Status:", resp.Status)
@@ -228,6 +230,14 @@ func CreateBooking(s *mgo.Session) func(w http.ResponseWriter, r *http.Request) 
 				log.Println("Failed to insert booking: ", err)
 				return
 			}
+
+			// Create a QR code
+			err := qrcode.WriteFile(booking.UUID, qrcode.Medium, 256, "qr.png")
+
+			if err != nil {
+				log.Println("Failed to create a QR code: ", err)
+			}
+			
 			// Write response
 			w.Header().Set("Content-Type", "application/json")
 			w.Header().Set("Location", r.URL.Path)
