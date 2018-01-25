@@ -49,5 +49,5 @@ func main() {
 		WriteTimeout: 15 * time.Second,
 		ReadTimeout:  15 * time.Second,
 	}
-	log.Fatal(server.ListenAndServe(TLS("fullchain.pem", "privkey.pem"))
+	log.Fatal(server.ListenAndServeTLS("fullchain.pem", "privkey.pem"))
 }
