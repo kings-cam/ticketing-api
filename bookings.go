@@ -234,6 +234,9 @@ func CreateBooking(s *mgo.Session) func(w http.ResponseWriter, r *http.Request) 
 			// Create a QR code
 			err := qrcode.WriteFile("https://store.kings.cam.ac.uk/bookings/"+booking.UUID, qrcode.Medium, 256, booking.UUID+".png")
 
+			// Send an email
+			sendmail(&booking)
+			
 			if err != nil {
 				log.Println("Failed to create a QR code: ", err)
 			}
