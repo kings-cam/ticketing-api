@@ -12,7 +12,7 @@ import (
 // Sends email
 func sendmail(booking *Booking) {
 
-	mg := mailgun.NewMailgun("sandbox58b570d32fb64c16a83fd3f306d57045.mailgun.org", os.Getenv("MailGunKey"), os.Getenv("MailGunPubKey"))
+	mg := mailgun.NewMailgun("mail.kingscollegecam.com", os.Getenv("MailGunKey"), os.Getenv("MailGunPubKey"))
 
 	message := mg.NewMessage(
 		/* Sender */ "store@kings.cam.ac.uk",
