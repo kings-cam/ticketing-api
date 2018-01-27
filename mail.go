@@ -15,7 +15,7 @@ func sendmail(booking *Booking) {
 	mg := mailgun.NewMailgun("mail.kingscollegecam.com", os.Getenv("MailGunKey"), os.Getenv("MailGunPubKey"))
 
 	message := mg.NewMessage(
-		/* Sender */ "store@kings.cam.ac.uk",
+		/* Sender */ "noreply@store.kings.cam.ac.uk",
 		/* Subject*/ "King's College Chapel Ticket",
 		/* Body */ "",
 		/* Recipient */ booking.Email)
