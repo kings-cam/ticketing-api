@@ -3,14 +3,14 @@ package tickets
 import (
 	"encoding/json"
 	"net/http"
-	// "os"
+	"os"
 
 	// CORS
 	"github.com/rs/cors"
 	// JWT
-	// "github.com/dgrijalva/jwt-go"
+	"github.com/dgrijalva/jwt-go"
 	// JSON Web Tokens middleware Auth0
-	// "github.com/auth0/go-jwt-middleware"
+	"github.com/auth0/go-jwt-middleware"
 	// Mongodb
 	"gopkg.in/mgo.v2"
 	// Gorilla Mux
@@ -25,12 +25,14 @@ import (
 func Router() *mux.Router {
 	apirouter := mux.NewRouter()
 
+	//For production, keep HTTPSProtection = true
 	/*
-		//For production, keep HTTPSProtection = true
-		HTTPSProtection := false
-		if HTTPSProtection {
-			app.Use(restgate.New("X-Auth-Key", "X-Auth-Secret", restgate.Static, restgate.Config{HTTPSProtectionOff: false, Key: []string{c.API_ENDPOINT_KEY}, Secret: []string{c.API_ENDPOINT_SECRET}}))
-	*/
+	HTTPSProtection := false
+	if HTTPSProtection {
+		apirouter.Use(restgate.New("X-Auth-Key", "X-Auth-Secret", restgate.Static, restgate.Config{HTTPSProtectionOff: false, Key: []string{c.API_ENDPOINT_KEY}, Secret: []string{c.API_ENDPOINT_SECRET}}))
+
+	}
+        */
 
 	// API Router
 	apirouter.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
@@ -43,7 +45,7 @@ func Router() *mux.Router {
 func V1Router(apirouter *mux.Router) *mux.Router {
 	// Stats middleware
 	statsmw := stats.New()
-	
+
 	// CORS for cross-domain access controls
 	corsmw := cors.New(cors.Options{
 		AllowedOrigins:   []string{"https://store.kings.cam.ac.uk"},
@@ -85,21 +87,21 @@ func V1CONFIGRouter(apirouter *mux.Router) *mux.Router {
 		AllowedHeaders:   []string{"*"},
 	})
 
-	/*
-	// Auth0 JWT middleware
-	jwtMiddleware := jwtmiddleware.New(jwtmiddleware.Options{
-		ValidationKeyGetter: func(token *jwt.Token) (interface{}, error) {
-			return []byte(os.Getenv("Auth0")), nil
-		},
-		SigningMethod: jwt.SigningMethodHS256,
-	})
-*/
+	
+		// Auth0 JWT middleware
+		jwtMiddleware := jwtmiddleware.New(jwtmiddleware.Options{
+			ValidationKeyGetter: func(token *jwt.Token) (interface{}, error) {
+				return []byte(os.Getenv("Auth0")), nil
+			},
+			SigningMethod: jwt.SigningMethodHS256,
+		})
+	
 	// API V1CONFIG router
 	apiconfigrouter := mux.NewRouter().PathPrefix("/config").Subrouter().StrictSlash(true)
 	apirouter.PathPrefix("/config").Handler(negroni.New(
 		negroni.NewRecovery(),
 		negroni.NewLogger(),
-		// negroni.HandlerFunc(jwtMiddleware.HandlerWithNext),
+		negroni.HandlerFunc(jwtMiddleware.HandlerWithNext),
 		statsmw,
 		corsmw,
 		negroni.Wrap(apiconfigrouter),
