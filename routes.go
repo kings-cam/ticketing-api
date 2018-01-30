@@ -81,7 +81,7 @@ func V1CONFIGRouter(apirouter *mux.Router) *mux.Router {
 
 	// CORS for cross-domain access controls
 	corsmw := cors.New(cors.Options{
-		AllowedOrigins:   []string{"*"},
+		AllowedOrigins:   []string{"https://store.kings.cam.ac.uk"},
 		AllowedMethods:   []string{"GET", "HEAD", "PUT", "PATCH", "POST", "DELETE"},
 		AllowCredentials: true,
 		AllowedHeaders:   []string{"*"},
