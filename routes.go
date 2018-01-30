@@ -27,12 +27,12 @@ func Router() *mux.Router {
 
 	//For production, keep HTTPSProtection = true
 	/*
-	HTTPSProtection := false
-	if HTTPSProtection {
-		apirouter.Use(restgate.New("X-Auth-Key", "X-Auth-Secret", restgate.Static, restgate.Config{HTTPSProtectionOff: false, Key: []string{c.API_ENDPOINT_KEY}, Secret: []string{c.API_ENDPOINT_SECRET}}))
+		HTTPSProtection := false
+		if HTTPSProtection {
+			apirouter.Use(restgate.New("X-Auth-Key", "X-Auth-Secret", restgate.Static, restgate.Config{HTTPSProtectionOff: false, Key: []string{c.API_ENDPOINT_KEY}, Secret: []string{c.API_ENDPOINT_SECRET}}))
 
-	}
-        */
+		}
+	*/
 
 	// API Router
 	apirouter.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
@@ -87,15 +87,14 @@ func V1CONFIGRouter(apirouter *mux.Router) *mux.Router {
 		AllowedHeaders:   []string{"*"},
 	})
 
-	
-		// Auth0 JWT middleware
-		jwtMiddleware := jwtmiddleware.New(jwtmiddleware.Options{
-			ValidationKeyGetter: func(token *jwt.Token) (interface{}, error) {
-				return []byte(os.Getenv("Auth0")), nil
-			},
-			SigningMethod: jwt.SigningMethodHS256,
-		})
-	
+	// Auth0 JWT middleware
+	jwtMiddleware := jwtmiddleware.New(jwtmiddleware.Options{
+		ValidationKeyGetter: func(token *jwt.Token) (interface{}, error) {
+			return []byte(os.Getenv("Auth0")), nil
+		},
+		SigningMethod: jwt.SigningMethodHS256,
+	})
+
 	// API V1CONFIG router
 	apiconfigrouter := mux.NewRouter().PathPrefix("/config").Subrouter().StrictSlash(true)
 	apirouter.PathPrefix("/config").Handler(negroni.New(
