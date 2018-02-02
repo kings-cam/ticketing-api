@@ -21,11 +21,13 @@ dep ensure -update
 
 # Run
 
-## Launch mongo
+## Launch mongo (testing only)
 `mkdir ./db && mongod --dbpath ./db`
 
 ## Run api server
-`Auth0=<JWT-SecretKey> MongoUser=<username> MongoPW=<passwd> MongoPort=27017 IP=127.0.0.1 Port=4000 ./api `
+```
+Auth0=<JWT-SecretKey> WorldPay=<API-Key> MongoUser=<username> MongoPW=<passwd> MongoPort=27017 IP=<localhost or yourip> Port=4000 MailGunKey=<API-Key> MailGunPubKey=<pubkey> ./api
+```
 
 # Stats
 
