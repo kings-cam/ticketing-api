@@ -28,6 +28,11 @@ dep ensure -update
 ```
 Auth0=<JWT-SecretKey> WorldPay=<API-Key> MongoUser=<username> MongoPW=<passwd> MongoPort=27017 IP=<localhost or yourip> Port=4000 MailGunKey=<API-Key> MailGunPubKey=<pubkey> ./api
 ```
+## Let's encrypt
+* Install certbot `dnf install certbot`
+* Generate a key `sudo certbot certonly --standalone -d api.kingscollegecam.com`. This will create a key in `/etc/letsencrypt/live`
+*  copy keys `cp /etc/letsencrypt/live/api.kingscollegecam.com/privkey.pem /root/go/src/tickets`
+* copy chain `cp /etc/letsencrypt/live/api.kingscollegecam.com/fullchain.pem /root/go/src/tickets/
 
 # Stats
 
