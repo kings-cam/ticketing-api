@@ -1,7 +1,9 @@
 package tickets
 
 import (
+	"bytes"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -189,6 +191,7 @@ func GetBookingsRangeSummary(s *mgo.Session) func(w http.ResponseWriter, r *http
 		}
 
 		var summary Booking
+		var guides []string
 		for _, booking := range bookings {
 			summary.Total += booking.Total
 			summary.Ntickets += booking.Ntickets
@@ -196,8 +199,22 @@ func GetBookingsRangeSummary(s *mgo.Session) func(w http.ResponseWriter, r *http
 			summary.Nchild += booking.Nchild
 			summary.Nconcession += booking.Nconcession
 			summary.Nguides += booking.Nguides
+			for _, book := range booking.Guidebooks {
+				guides = append(guides, book)
+			}
 		}
 		summary.Name = "Total # of booking: " + strconv.Itoa(len(bookings))
+
+		// Count number of guide books in each category
+		guidescounter := make(map[string]int)
+		for _, row := range guides {
+			guidescounter[row]++
+		}
+
+		// Add counter to Guidebooks as a string
+		var guidescount []string
+		guidescount = append(guidescount, StringifyKeyValuePairs(guidescounter))
+		summary.Guidebooks = guidescount
 
 		// Marshall booking
 		respBody, err := json.MarshalIndent(summary, "", "  ")
@@ -383,4 +400,13 @@ func DeleteBooking(s *mgo.Session) func(w http.ResponseWriter, r *http.Request) 
 		w.Header().Set("Location", r.URL.Path)
 		w.WriteHeader(http.StatusCreated)
 	}
+}
+
+// StringifyKeyValuePairs Return a string from a key value map
+func StringifyKeyValuePairs(m map[string]int) string {
+	b := new(bytes.Buffer)
+	for key, value := range m {
+		fmt.Fprintf(b, "%s: %d; ", key, value)
+	}
+	return b.String()
 }
