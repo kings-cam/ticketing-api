@@ -22,7 +22,7 @@ func sendmail(booking *Booking) {
 	message.SetHtml("<html><p>Booking reference: " + booking.UUID + "<br/>Booking date and sessions: " + booking.Date + " " + booking.Session + "<br/>Total for " + strconv.Itoa(booking.Ntickets) + " tickets (" + strconv.Itoa(booking.NAdults) + " adults, " + strconv.Itoa(booking.Nconcession) + " students and " + strconv.Itoa(booking.Nchild) + " child) and " + strconv.Itoa(booking.Nguides) + " guide books is: <span>&#163;</span>" + fmt.Sprintf("%.2f", booking.Total) + "</p><p>Please present your ticket at the main gate on King’s Parade and you will be directed to the entrance.<img src=\"cid:" + booking.UUID + ".png\"></p><p>If you have ordered a guidebook, please collect from the Chapel entrance. Find out how to get here at <a href=\"http://www.kings.cam.ac.uk/visit/getting-to-kings.html\">http://www.kings.cam.ac.uk/visit/getting-to-kings.html</a></p><p>Whilst at King's, do visit the King's College Visitor Centre on King's Parade (opposite the main gate) for souvenirs, gifts, CDs and clothing. Alternatively visit the online shop at <a href=\"http://shop.kings.cam.ac.uk\">http://shop.kings.cam.ac.uk</a></p></html>")
 
 	message.AddInline(booking.UUID + ".png")
-	message.AddCC("shop@kings.cam.ac.uk")
+	message.AddCC("tourism@kings.cam.ac.uk")
 	resp, id, err := mg.Send(message)
 	if err != nil {
 		log.Fatal(err)
