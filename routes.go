@@ -86,7 +86,6 @@ func V1CONFIGRouter(apirouter *mux.Router) *mux.Router {
 		AllowCredentials: true,
 		AllowedHeaders:   []string{"*"},
 	})
-
 	// Auth0 JWT middleware
 	jwtMiddleware := jwtmiddleware.New(jwtmiddleware.Options{
 		ValidationKeyGetter: func(token *jwt.Token) (interface{}, error) {
@@ -94,7 +93,6 @@ func V1CONFIGRouter(apirouter *mux.Router) *mux.Router {
 		},
 		SigningMethod: jwt.SigningMethodHS256,
 	})
-
 	// API V1CONFIG router
 	apiconfigrouter := mux.NewRouter().PathPrefix("/config").Subrouter().StrictSlash(true)
 	apirouter.PathPrefix("/config").Handler(negroni.New(
@@ -162,11 +160,15 @@ func ConfigRoutes(apiv1router *mux.Router, session *mgo.Session) {
 
 	// Get existing booking
 	apiv1router.HandleFunc("/bookings/{uuid}", GetBooking(session)).Methods("GET")
+
 	// Return all bookings
 	apiv1router.HandleFunc("/bookings", GetBookings(session)).Methods("GET")
 
 	// Return all bookings matching a date
 	apiv1router.HandleFunc("/bookings/date/{date}", GetBookingsDate(session)).Methods("GET")
+	
+	// Return a summary of bookings matching a date range
+	apiv1router.HandleFunc("/bookings/range/{date}", GetBookingsRangeSummary(session)).Methods("GET")
 
 	// Update an existing booking
 	apiv1router.HandleFunc("/bookings/{uuid}", UpdateBooking(session)).Methods("PUT")

@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"strings"
 
 	// Mongo DB
 	"gopkg.in/mgo.v2"
@@ -162,6 +163,52 @@ func GetBookingsDate(s *mgo.Session) func(w http.ResponseWriter, r *http.Request
 	}
 }
 
+// GetBookingsRangeSummary returns the summaray of booking matching a start - end date
+// BUG(r) This function returns a booking matching uuid
+func GetBookingsRangeSummary(s *mgo.Session) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		// Copy and launch a Mongo session
+		session := s.Copy()
+		defer session.Close()
+
+		// Open bookings collections
+		dbc := session.DB("tickets").C("bookings")
+
+		vars := mux.Vars(r)
+		startdate := strings.Split(vars["date"], ":")[0]
+		enddate := strings.Split(vars["date"], ":")[1]
+
+		var bookings []Booking
+
+		// Find all bookings matching the date
+		err := dbc.Find(bson.M{"date": bson.M{"$gte": startdate, "$lte": enddate}}).All(&bookings)
+		if err != nil {
+			ErrorWithJSON(w, "Database error, failed to find booking with date!", http.StatusInternalServerError)
+			log.Println("Failed to find booking with the specified date: ", err)
+			return
+		}
+
+		var summary Booking
+		for _, booking := range bookings {
+			summary.Total += booking.Total
+			summary.Ntickets += booking.Ntickets
+			summary.NAdults += booking.NAdults
+			summary.Nchild += booking.Nchild
+			summary.Nconcession += booking.Nconcession
+			summary.Nguides += booking.Nguides
+		}
+		summary.Name = "Total # of booking: " + strconv.Itoa(len(bookings))
+
+		// Marshall booking
+		respBody, err := json.MarshalIndent(summary, "", "  ")
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		ResponseWithJSON(w, respBody, http.StatusOK)
+	}
+}
+
 // CreateBooking creates a new booking object and writes to MongoDB booking collection.
 // BUG(r) This function doesn't check if the incoming body matches the booking structure
 // BUG(r) This function doesn't check if UUID is a valid UUID
@@ -236,7 +283,6 @@ func CreateBooking(s *mgo.Session) func(w http.ResponseWriter, r *http.Request) 
 
 			// Send an email
 			sendmail(&booking)
-			
 			if err != nil {
 				log.Println("Failed to create a QR code: ", err)
 			}
