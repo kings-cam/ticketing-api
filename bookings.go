@@ -163,7 +163,7 @@ func GetBookingsDate(s *mgo.Session) func(w http.ResponseWriter, r *http.Request
 	}
 }
 
-// GetBookingsRange returns the summaray of booking matching a start - end date
+// GetBookingsRangeSummary returns the summaray of booking matching a start - end date
 // BUG(r) This function returns a booking matching uuid
 func GetBookingsRangeSummary(s *mgo.Session) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
